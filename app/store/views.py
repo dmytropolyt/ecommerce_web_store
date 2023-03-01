@@ -1,7 +1,10 @@
 from django.views.generic import TemplateView, ListView, DetailView
 from django.shortcuts import get_object_or_404
+
 from .models import Product
 from category.models import Category
+from carts.models import CartItem
+from carts.views import _cart_id
 
 
 class StoreView(ListView):
@@ -35,5 +38,13 @@ class ProductDetailView(DetailView):
             )
         except Exception as e:
             raise e
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['in_cart'] = CartItem.objects.filter(
+            cart__cart_id=_cart_id(self.request), product=context['single_product']
+        ).exists()
+
+        return context
 
 

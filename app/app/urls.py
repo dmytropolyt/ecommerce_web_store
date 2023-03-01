@@ -24,7 +24,8 @@ from . import views
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.HomeView.as_view(), name='home'),
-    path('store/', include('store.urls'))
+    path('store/', include('store.urls')),
+    path('cart/', include('carts.urls')),
 ]
 
 if settings.DEBUG:
