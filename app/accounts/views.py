@@ -101,10 +101,10 @@ class LoginView(View):
 
             auth.login(request, user)
             messages.success(request, 'You are now logged in.')
-            url = requests.META.get('HTTP_REFERER')
+
             try:
+                url = requests.META.get('HTTP_REFERER')
                 query = requests.utils.urlparse(url).query
-                print('query ->', query)
                 params = dict(x.split('-') for x in query.split('g'))
                 if 'next' in params:
                     next_page = params['next']

@@ -34,7 +34,7 @@ class CartView(TemplateView):
             tax = 2 * total / 100
             grand_total = total + tax
         except ObjectDoesNotExist:
-            pass
+            cart_items = None
 
         context = {
             'total': total,
