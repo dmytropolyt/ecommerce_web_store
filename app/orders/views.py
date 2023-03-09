@@ -7,7 +7,7 @@ from store.models import Product
 from django.urls import reverse
 
 import datetime
-from .liqpay import LiqPay
+from liqpay import LiqPay
 from django.conf import settings
 from django.contrib.sites.shortcuts import get_current_site
 from django.utils.decorators import method_decorator
