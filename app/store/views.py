@@ -1,11 +1,14 @@
-from django.views.generic import TemplateView, ListView, DetailView, View
-from django.shortcuts import get_object_or_404, render
+from django.views.generic import TemplateView, ListView, DetailView, View, CreateView
+from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Q
+from django.contrib import messages
 
-from .models import Product
+from .models import Product, ReviewRating
 from category.models import Category
 from carts.models import CartItem
+from orders.models import OrderProduct
 from carts.views import _cart_id
+from .forms import ReviewForm
 
 
 class StoreView(ListView):
@@ -52,11 +55,21 @@ class ProductDetailView(DetailView):
             cart__cart_id=_cart_id(self.request), product=context['single_product']
         ).exists()
 
+        try:
+            context['order_product'] = OrderProduct.objects.filter(
+                user=self.request.user, product_id=self.get_object().id
+            ).exists()
+        except (OrderProduct.DoesNotExist, TypeError):
+            context['order_product'] = None
+
+        # Get the reviews
+        context['reviews'] = context['single_product'].review
+
         return context
 
 
 class SearchView(View):
-    """View for searching """
+    """View for searching product."""
 
     def get(self, request, *args, **kwargs):
         if 'keyword' in request.GET:
@@ -75,3 +88,25 @@ class SearchView(View):
         return render(request, 'store/store.html', context)
 
 
+class SubmitReviewView(CreateView):
+    form_class = ReviewForm
+    pk_url_kwarg = 'product_id'
+
+    def post(self, request, *args, **kwargs):
+        url = request.META.get('HTTP_REFERER')
+        try:
+            reviews = ReviewRating.objects.get(user__id=request.user.id, product__id=kwargs['product_id'])
+            form = ReviewForm(request.POST, instance=reviews)
+            form.save()
+            messages.success(request, 'Thank you! Your review has been updated.')
+            return redirect(url)
+        except ReviewRating.DoesNotExist:
+            form = ReviewForm(request.POST)
+            if form.is_valid():
+                review = form.save(commit=False)
+                review.ip = request.META.get('REMOTE_ADDR')
+                review.product_id = kwargs['product_id']
+                review.user_id = request.user.id
+                review.save()
+                messages.success(request, 'Thank you! Your review has been submitted.')
+                return redirect(url)

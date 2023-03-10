@@ -1,6 +1,11 @@
 from django.db import models
 from django.urls import reverse
 from category.models import Category
+from django.contrib.auth import get_user_model
+from django.db.models import Avg
+
+
+User = get_user_model()
 
 
 class Product(models.Model):
@@ -20,6 +25,10 @@ class Product(models.Model):
 
     def __str__(self):
         return self.name
+
+    def average_review(self):
+        reviews = self.review.aggregate(average=Avg('rating'))
+        return reviews['average'] if reviews['average'] else 0
 
 
 class VariationManager(models.Manager):
@@ -47,3 +56,18 @@ class Variation(models.Model):
 
     def __str__(self):
         return self.value
+
+
+class ReviewRating(models.Model):
+    product = models.ForeignKey(Product, related_name='review', on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    subject = models.CharField(max_length=100, blank=True)
+    review = models.TextField(max_length=500, blank=True)
+    rating = models.FloatField()
+    ip = models.GenericIPAddressField(blank=True, null=True)
+    status = models.BooleanField(default=True)
+    created_date = models.DateTimeField(auto_now_add=True)
+    updated_date = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.subject
