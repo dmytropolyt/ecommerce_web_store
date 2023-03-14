@@ -4,6 +4,8 @@ from category.models import Category
 from django.contrib.auth import get_user_model
 from django.db.models import Avg
 
+import os
+
 
 User = get_user_model()
 
@@ -71,3 +73,21 @@ class ReviewRating(models.Model):
 
     def __str__(self):
         return self.subject
+
+
+class ProductGallery(models.Model):
+
+    def image_upload_to(self, instance=None):
+        if instance:
+            return os.path.join('store/products', self.product.name, instance)
+        return None
+
+    product = models.ForeignKey(Product, related_name='gallery', default=None, on_delete=models.CASCADE)
+    image = models.ImageField(upload_to=image_upload_to, max_length=255)
+
+    def __str__(self):
+        return self.product.name
+
+    class Meta:
+        verbose_name = 'productgallery'
+        verbose_name_plural = 'product gallery'

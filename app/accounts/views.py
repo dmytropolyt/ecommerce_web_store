@@ -1,11 +1,12 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import View, CreateView, TemplateView
-from django.contrib.auth.views import PasswordResetConfirmView
+from django.views.generic import View, CreateView, TemplateView, ListView, DetailView
+from django.contrib.auth.views import PasswordResetConfirmView, PasswordChangeView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.contrib import messages, auth
-from .forms import RegistrationForm, ChangePasswordForm
+from .forms import RegistrationForm, ForgotPasswordForm, EditUserForm, EditUserProfileForm, ChangePasswordForm
+from .models import UserProfile
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -15,7 +16,9 @@ from django.contrib.auth.tokens import default_token_generator
 from django.core.mail import EmailMessage
 
 from carts.models import Cart, CartItem
+from orders.models import Order, OrderProduct
 from carts.views import _cart_id
+from functools import reduce
 import requests
 
 
@@ -153,6 +156,72 @@ class DashboardView(LoginRequiredMixin, TemplateView):
     """View for user's dashboard."""
     template_name = 'accounts/dashboard.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['orders'] = Order.objects.order_by('-created_at').filter(
+            user=self.request.user, is_ordered=True
+        )
+        context['userprofile'] = UserProfile.objects.get(user=self.request.user)
+        return context
+
+
+class UserOrdersView(LoginRequiredMixin, ListView):
+    template_name = 'accounts/my_orders.html'
+    context_object_name = 'orders'
+
+    def get_queryset(self):
+        return Order.objects.filter(user=self.request.user, is_ordered=True).order_by('-created_at')
+
+
+class EditProfileView(LoginRequiredMixin, TemplateView):
+    template_name = 'accounts/edit_profile.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['user_form'] = EditUserForm(instance=self.request.user)
+        context['userprofile'] = get_object_or_404(UserProfile, user=self.request.user)
+        context['profile_form'] = EditUserProfileForm(instance=context['userprofile'])
+        return context
+
+    def post(self, request, *args, **kwargs):
+        userprofile = self.get_context_data()['userprofile']
+        user_form = EditUserForm(request.POST, instance=request.user)
+        profile_form = EditUserProfileForm(request.POST, request.FILES, instance=userprofile)
+        if user_form.is_valid() and profile_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            messages.success(request, 'Your profile has been updated.')
+            return redirect('edit-profile')
+
+
+class ChangePasswordView(PasswordChangeView):
+    template_name = 'accounts/change_password.html'
+    form_class = ChangePasswordForm
+    success_url = reverse_lazy('change-password')
+
+    def form_valid(self, form):
+        messages.success(self.request, 'Password updated successfully.')
+        return super().form_valid(form)
+
+
+class OrderDetailView(LoginRequiredMixin, DetailView):
+    queryset = Order.objects.all()
+    template_name = 'accounts/order_detail.html'
+    pk_url_kwarg = 'order_id'
+    context_object_name = 'order'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['sub_total'] = reduce(
+            lambda a, b: a+b, [i.product_price * i.quantity for i in context['order'].order_product.all()]
+        )
+
+        return context
+
+    def get_object(self, queryset=None):
+        return self.queryset.get(order_number=self.kwargs.get(self.pk_url_kwarg))
+
 
 class AccountPasswordResetView(TemplateView):
     template_name = 'accounts/password_reset.html'
@@ -188,7 +257,7 @@ class AccountPasswordResetView(TemplateView):
 
 class AccountPasswordResetConfirmView(PasswordResetConfirmView):
     """View for reset user's password by email link."""
-    form_class = ChangePasswordForm
+    form_class = ForgotPasswordForm
     success_url = reverse_lazy('login')
     template_name = 'accounts/password_reset_confirm.html'
 

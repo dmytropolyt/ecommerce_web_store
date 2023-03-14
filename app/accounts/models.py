@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
 
+import os
+
 
 class MyAccountManager(BaseUserManager):
 
@@ -68,3 +70,24 @@ class Account(AbstractBaseUser):
 
     def has_module_perms(self, add_label):
         return True
+
+
+class UserProfile(models.Model):
+
+    def image_upload_to(self, instance=None):
+        if instance:
+            return os.path.join('user_profile', self.user.email, instance)
+        return None
+
+    user = models.OneToOneField(Account, related_name='profile', on_delete=models.CASCADE)
+    address_line_1 = models.CharField(max_length=100, blank=True)
+    address_line_2 = models.CharField(max_length=100, blank=True)
+    picture = models.ImageField(default='user_profile/default/default_user.png', upload_to=image_upload_to)
+    city = models.CharField(blank=True, max_length=20)
+    state = models.CharField(blank=True, max_length=20)
+
+    def __str__(self):
+        return self.user.first_name
+
+    def full_address(self):
+        return f'{self.address_line_1} {self.address_line_2}'

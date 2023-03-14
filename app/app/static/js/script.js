@@ -61,8 +61,3 @@ $(document).ready(function() {
 setTimeout(function(){
     $('#message').fadeOut('slow')
 }, 4000)
-
-$('#liqpay_input').attr("src", "{% static 'images/icons/logo_liqpay_for_white.png' %}");
-
-
-
