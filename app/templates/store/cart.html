@@ -22,7 +22,7 @@
   <th scope="col">Product</th>
   <th scope="col" width="120">Quantity</th>
   <th scope="col" width="120">Price</th>
-  <th scope="col" class="text-right" width="200"> </th>
+  <th scope="col" class="text-end" width="200"> </th>
 </tr>
 </thead>
 <tbody>
@@ -51,17 +51,18 @@
 					<div class="input-group-prepend">
 					<form action="{% url 'carts:remove-cart' cart_item.product.id cart_item.id %}" method="POST">
 						{% csrf_token %}
-						<button class="btn btn-light" type="submit" id="button-plus"> <i class="fa fa-minus"></i> </button>
+						<button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-minus"></i> </button>
 					</form>
 					</div>
-					<input type="text" class="form-control"  value="{{ cart_item.quantity }}">
+					<input type="text" class="form-control" name="quantity{{ cart_item.id }}" value="{{ cart_item.quantity }}">
 					<div class="input-group-append">
-					<form action="{% url 'carts:add-cart' cart_item.product.id %}" method="POST">
+					<form class="add-to-cart-in-cart-{{ cart_item.id }}" method="POST">
 						{% csrf_token %}
 						{% for item in cart_item.variations.all %}
 						<input type="hidden" name="{{ item.category|lower }}" value="{{ item.value|capfirst }}">
 						{% endfor %}
-						<button class="btn btn-light" type="submit" id="button-minus"> <i class="fa fa-plus"></i> </button>
+						<button class="btn btn-light add-to-cart" type="submit" id="button-plus"
+								data-product="{{ cart_item.product.id }}" data-cart="{{ cart_item.id }}"> <i class="fa fa-plus"></i> </button>
 					</form>
 					</div>
 				</div> <!-- input-group.// -->
@@ -73,7 +74,7 @@
 			<small class="text-muted"> $ {{ cart_item.product.price }} each </small>
 		</div> <!-- price-wrap .// -->
 	</td>
-	<td class="text-right">
+	<td class="text-end">
 		<form action="{% url 'carts:remove-cart-item' cart_item.product.id cart_item.id %}" method="post">
 		{% csrf_token %}
 			<button type="submit" class="btn btn-danger"
@@ -93,21 +94,21 @@
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Total price:</dt>
-			  <dd class="text-right">$ {{ total }}</dd>
+			  <dd class="text-end">$ {{ total }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Tax:</dt>
-			  <dd class="text-right"> $ {{ tax }}</dd>
+			  <dd class="text-end"> $ {{ tax }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Total:</dt>
-			  <dd class="text-right text-dark b"><strong>$ {{ grand_total }}</strong></dd>
+			  <dd class="text-end text-dark b"><strong>$ {{ grand_total }}</strong></dd>
 			</dl>
 			<hr>
 			<p class="text-center mb-3">
 				<img src="{% static './images/misc/payments.png' %}" height="26">
 			</p>
-			<a href="{% url 'carts:checkout' %}" class="btn btn-primary btn-block"> Checkout </a>
+			<a href="{% url 'carts:checkout' %}" class="btn btn-primary btn-block me-2" style="width: 110px;"> Checkout </a>
 			<a href="{% url 'store:store' %}" class="btn btn-light btn-block">Continue Shopping</a>
 		</div> <!-- card-body.// -->
 		</div> <!-- card.// -->
@@ -122,5 +123,8 @@
 </div> <!-- container .//  -->
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock %}
 
+{% block js %}
+<script src="{% static 'js/ajax_for_cart.js' %}" type="text/javascript"></script>
 {% endblock %}

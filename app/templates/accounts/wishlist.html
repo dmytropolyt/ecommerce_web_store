@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!-- ========================= SECTION CONTENT ========================= -->
+<section class="section-content padding-y bg">
+{% include 'includes/alerts.html' %}
+<div class="container">
+	<div class="row">
+	{% include 'includes/dashboard_sidebar.html' %}
+	<main class="col-md-9">
+		<article class="card">
+		<header class="card-header">
+			<strong class="d-inline-block mr-3">Your wishlist</strong>
+		</header>
+		<div class="card-body">
+			<div class="row">
+                {% if wishlist %}
+				{% for product in wishlist %}
+                    <div class="col-md-4">
+						<figure class="card card-product-grid">
+							<div class="img-wrap">
+
+								<a href="{{ product.get_url }}"><img src="{{ product.image.url }}"></a>
+
+							</div> <!-- img-wrap.// -->
+							<figcaption class="info-wrap">
+								<div class="fix-height">
+									<a href="{{ product.get_url }}" class="title">{{ product.name }}</a>
+									<div class="row">
+										<div class="col">
+											<div class="price-wrap mt-2">
+												<span class="price">$ {{ product.price }}</span>
+											</div> <!-- price-wrap.// -->
+										</div>
+										<div class="col d-flex justify-content-end">
+											{% csrf_token %}
+											{% if user in product.users_wishlist.all %}
+											<button class="btn btn-light btn-sm add-to-wishlist added-to-wishlist" data-product="{{ product.id }}"><i class="fa fa-heart"></i></button>
+											{% else %}
+											<button class="btn btn-light btn-sm add-to-wishlist" data-product="{{ product.id }}"><i class="fa fa-heart"></i></button>
+											{% endif %}
+									</div>
+								</div>
+									<div class="rating-star mb-3">
+										<span>
+											<i class="fa fa-star{% if product.average_review < 0.5 %}-o{% elif product.average_review >= 0.5 and product.average_review < 1 %}-half-o {% endif %}" aria-hidden="true"></i>
+											<i class="fa fa-star{% if product.average_review < 1.5 %}-o{% elif product.average_review >= 1.5 and product.average_review < 2 %}-half-o {% endif %}" aria-hidden="true"></i>
+											<i class="fa fa-star{% if product.average_review < 2.5 %}-o{% elif product.average_review >= 2.5 and product.average_review < 3 %}-half-o {% endif %}" aria-hidden="true"></i>
+											<i class="fa fa-star{% if product.average_review < 3.5 %}-o{% elif product.average_review >= 3.5 and product.average_review < 4 %}-half-o {% endif %}" aria-hidden="true"></i>
+											<i class="fa fa-star{% if product.average_review < 4.5 %}-o{% elif product.average_review >= 4.5 and product.average_review < 5 %}-half-o {% endif %}" aria-hidden="true"></i>
+											<span> {{ product.review.count }} reviews</span>
+										</span>
+									</div>
+								</div>
+								<a href="{{ product.get_url }}" class="btn btn-block btn-primary">View Details</a>
+							</figcaption>
+						</figure>
+					</div> <!-- col.// -->
+				{% endfor %}
+                {% else %}
+					<h2 class="text-center">Your Wishlist is Empty</h2>
+                {% endif %}
+			</div> <!-- row.// -->
+		</div> <!-- card-body .// -->
+
+		</article> <!-- order-group.// -->
+	</main>
+</div> <!-- row.// -->
+</div>
+
+
+</section>
+<!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock %}

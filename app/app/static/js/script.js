@@ -60,4 +60,76 @@ $(document).ready(function() {
 
 setTimeout(function(){
     $('#message').fadeOut('slow')
-}, 4000)
+}, 4000);
+
+$('.owl-carousel').owlCarousel({
+    items: 4,
+    margin: 10,
+    responsiveClass: true,
+    autoWidth: true,
+    slideBy: 4,
+    dotsEach: 1,
+    responsive:{
+        0:{
+            items:1
+        },
+        600:{
+            items:2
+        },
+        1000:{
+            items:4
+        }
+    }
+});
+
+$('.add-to-wishlist').on('click', function(){
+    var product_id = $(this).data('product');
+    var vm = $(this);
+    $.ajax({
+        url: "/store/add-wishlist/",
+        method: 'post',
+        data:{
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            product: product_id
+        },
+        dataType: 'json',
+        success: function(res){
+            if (res.bool == true){
+                vm.addClass('added-to-wishlist');
+            } else {
+                vm.removeClass('added-to-wishlist');
+            }
+
+            if (res.bool == true && vm.text()){
+                vm.find('span').text('In wishlist');
+            } else if (res.bool == false && vm.text()){
+                vm.find('span').text('Add to wishlist');
+            }
+            console.log(vm, res);
+        }
+    })
+});
+
+$('#add-to-cart').on('submit', function(e){
+    e.preventDefault();
+    var product_id = $('.add-to-cart').data('product');
+    var cart_count = $('#cart_count');
+    var size = $('#product-size').val();
+    var color = $('#product-color').val();
+    $.ajax({
+        url: `/cart/add-cart/${product_id}/`,
+        method: 'post',
+        data:{
+            csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
+            product_id: product_id,
+            size: size,
+            color: color,
+        },
+        dataType: 'json',
+        success: function(res){
+            cart_count.text(res['cart_items_count']);
+            console.log(res);
+        }
+    })
+});
+

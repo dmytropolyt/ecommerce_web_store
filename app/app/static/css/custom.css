@@ -62,3 +62,11 @@ ul.thumb li img{
     height: 80px;
     border: 1px solid grey;
 }
+
+.added-to-wishlist i{
+    color: red;
+}
+
+#wish {
+    width: 130.5px;
+}

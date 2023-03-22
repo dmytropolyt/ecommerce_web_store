@@ -6,7 +6,7 @@
       <span class="navbar-toggler-icon"></span>
     </button>
     <div class="collapse navbar-collapse" id="navbarTop4">
-      <ul class="navbar-nav mr-auto">
+      <ul class="navbar-nav me-auto">
           <li class="nav-item dropdown">
               <a href="#" class="nav-link">   English </a>
 
@@ -33,7 +33,7 @@
       </div>
       <div class="col-lg col-sm col-md col-6 flex-grow-0">
           <div class="category-wrap dropdown d-inline-block float-right">
-              <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+              <button type="button" class="btn btn-primary dropdown-toggle" data-bs-toggle="dropdown">
                   <i class="fa fa-bars"></i> All category
               </button>
               <div class="dropdown-menu">
@@ -44,7 +44,9 @@
               </div>
           </div>  <!-- category-wrap.// -->
       </div> <!-- col.// -->
-      <a href="{% url 'store:store' %}" class="btn btn-outline-primary">Store</a>
+      <div class="col-lg col-sm col-md col-6 flex-grow-0">
+        <a href="{% url 'store:store' %}" class="btn btn-outline-primary">Store</a>
+      </div>
       <div class="col-lg  col-md-6 col-sm-12 col">
           <form action="{% url 'store:search' %}" class="search" method="GET">
               <div class="input-group w-100">
@@ -77,9 +79,9 @@
                           </div>
                       </div>
                       {% endif %}
-                      <a href="{% url 'carts:cart' %}" class="widget-header pl-3 ml-3">
+                      <a href="{% url 'carts:cart' %}" class="widget-header ps-3 ms-3">
                           <div class="icon icon-sm rounded-circle border"><i class="fa fa-shopping-cart"></i></div>
-                          <span class="badge badge-pill badge-danger notify">{{ cart_count }}</span>
+                          <span class="badge badge-pill badge-danger notify" id="cart_count">{{ cart_count }}</span>
                       </a>
                   </div> <!-- widgets-wrap.// -->
               </div> <!-- col.// -->

@@ -1,10 +1,10 @@
 from django.shortcuts import render, redirect
-from django.views.generic import TemplateView, View, CreateView
+from django.views.generic import TemplateView, View
 from carts.models import CartItem
+from carts.views import _cart_id
 from .forms import OrderForm
 from .models import Order, Payment, OrderProduct
 from store.models import Product
-from django.urls import reverse
 
 import datetime
 from liqpay import LiqPay
@@ -39,7 +39,7 @@ class PaymentsView(TemplateView):
             order.save()
 
         # Move the cart items to OrderProduct model
-        cart_items = CartItem.objects.filter(user=order.user)
+        cart_items = CartItem.objects.filter(cart=_cart_id())
 
         for item in cart_items:
             order_product = OrderProduct()
@@ -83,7 +83,7 @@ class PlaceOrderView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cart_items'] = CartItem.objects.filter(user=self.request.user)
+        context['cart_items'] = CartItem.objects.filter(cart__cart_id=_cart_id(self.request))
         return context
 
     def get(self, request, *args, **kwargs):
@@ -108,7 +108,11 @@ class PlaceOrderView(TemplateView):
         if form.is_valid():
             # Store all the billing information inside Order table
             order = form.save(commit=False)
-            order.user = request.user
+
+            # Check user exist
+            if request.user.is_authenticated():
+                order.user = request.user
+
             order.order_total = grand_total
             order.tax = tax
             order.ip = request.META.get('REMOTE_ADDR')

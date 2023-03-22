@@ -13,7 +13,7 @@
 			<strong class="d-inline-block mr-3">Edit Your Profile</strong>
 		</header>
 		<div class="card-body">
-            <div class="text-right">
+            <div class="text-end">
                 <img src="{{ userprofile.picture.url }}" alt="Profile Picture" width="100" style="border-radius:50px;   ">
             </div>
 			<div class="row">
@@ -21,41 +21,41 @@
 				<div class="col-md-12">
 					<form action="{% url 'edit-profile' %}" method="POST" enctype="multipart/form-data">
                         {% csrf_token %}
-                        <div class="form-row">
+                        <div class="row mb-3">
                             <div class="form-group col-md-6">
-                                <label>First Name</label>
+                                <label class="form-label">First Name</label>
                                 {{ user_form.first_name }}
                             </div>
                             <div class="form-group col-md-6">
-                                <label>Last Name</label>
+                                <label class="form-label">Last Name</label>
                                 {{ user_form.last_name }}
                             </div>
                         </div>
-                        <div class="form-row">
+                        <div class="row mb-3">
                             <div class="form-group col-md-6">
-                                <label>Phone Number</label>
+                                <label class="form-label">Phone Number</label>
                                 {{ user_form.phone_number }}
                             </div>
                             <div class="form-group col-md-6">
-                                <label>Profile Picture</label>
+                                <label class="form-label">Profile Picture</label>
                                 {{ profile_form.picture }}
                             </div>
                         </div>
-                        <div class="form-group">
-                            <label>Address Line 1</label>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Address Line 1</label>
                             {{ profile_form.address_line_1 }}
                         </div>
-                        <div class="form-group">
-                            <label>Address Line 2</label>
+                        <div class="form-group mb-3">
+                            <label class="form-label">Address Line 2</label>
                             {{ profile_form.address_line_2 }}
                         </div>
-                        <div class="form-row">
+                        <div class="row mb-3">
                             <div class="form-group col-md-6">
-                                <label>City</label>
+                                <label class="form-label">City</label>
                                 {{ profile_form.city }}
                             </div>
                             <div class="form-group col-md-6">
-                                <label>State</label>
+                                <label class="form-label">State</label>
                                 {{ profile_form.state }}
                             </div>
                         </div>

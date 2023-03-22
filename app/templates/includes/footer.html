@@ -1,3 +1,4 @@
+{% load static %}
 <!-- ========================= FOOTER ========================= -->
 <footer class="section-footer border-top">
 	<div class="container">
@@ -10,7 +11,7 @@
 				<span  class="px-2">+879-332-9375</span>
 				<span  class="px-2">Street name 123, Avanue abc</span>
 			</div>
-			<div class="col-md-2 text-md-right text-muted">
+			<div class="col-md-2 text-md-end text-muted">
 				<i class="fab fa-lg fa-cc-visa"></i>
 				<i class="fab fa-lg fa-cc-paypal"></i>
 				<i class="fab fa-lg fa-cc-mastercard"></i>
@@ -20,6 +21,9 @@
 </footer>
 <!-- ========================= FOOTER END // ========================= -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.3/jquery.min.js"></script>
+<script src="{% static 'js/owl.carousel.min.js' %}"></script>
+<!-- custom javascript -->
+<script src="{% static 'js/script.js' %}" type="text/javascript"></script>
 <script>
 	$(document).ready(function(){
 		$('.thumb a').click(function(e){
@@ -28,6 +32,3 @@
 		})
 	})
 </script>
-
-</body>
-</html>

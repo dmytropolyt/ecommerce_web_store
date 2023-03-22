@@ -21,6 +21,7 @@ class Product(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
     created_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
+    users_wishlist = models.ManyToManyField(User, related_name='wishlist', blank=True)
 
     def get_url(self):
         return reverse('store:product-detail', args=[self.category.slug, self.slug])
@@ -91,3 +92,11 @@ class ProductGallery(models.Model):
     class Meta:
         verbose_name = 'productgallery'
         verbose_name_plural = 'product gallery'
+
+
+# class WishList(models.Model):
+#     user = models.ForeignKey(User, related_name='wishlist', on_delete=models.CASCADE)
+#     product = models.ForeignKey(Product, related_name='wishlist', on_delete=models.CASCADE)
+#
+#     class Meta:
+#         unique_together = ['user', 'product']

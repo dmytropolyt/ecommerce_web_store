@@ -9,4 +9,6 @@ urlpatterns = [
     path('category/<slug:category_slug>/<slug:product_slug>/', views.ProductDetailView.as_view(), name='product-detail'),
     path('search/', views.SearchView.as_view(), name='search'),
     path('submit_review/<int:product_id>/', views.SubmitReviewView.as_view(), name='submit-review'),
+    path('add-wishlist/', views.AddWishListView.as_view(), name='add-wishlist'),
+    path('my-wishlist/', views.WishListView.as_view(), name='my-wishlist'),
 ]

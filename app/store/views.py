@@ -1,7 +1,10 @@
-from django.views.generic import TemplateView, ListView, DetailView, View, CreateView
+from django.views.generic import ListView, DetailView, View, CreateView
 from django.shortcuts import get_object_or_404, render, redirect
 from django.db.models import Q
 from django.contrib import messages
+from django.http import JsonResponse
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 
 from .models import Product, ReviewRating
 from category.models import Category
@@ -9,6 +12,9 @@ from carts.models import CartItem
 from orders.models import OrderProduct
 from carts.views import _cart_id
 from .forms import ReviewForm
+
+
+User = get_user_model()
 
 
 class StoreView(ListView):
@@ -110,3 +116,28 @@ class SubmitReviewView(CreateView):
                 review.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
                 return redirect(url)
+
+
+class AddWishListView(LoginRequiredMixin, View):
+
+    def post(self, request, *args, **kwargs):
+        product_id = request.POST['product']
+        product = Product.objects.get(pk=product_id)
+
+        if product.users_wishlist.filter(email=request.user.email).exists():
+            product.users_wishlist.remove(request.user)
+            data = {'bool': False}
+        else:
+            product.users_wishlist.add(request.user)
+            data = {'bool': True}
+
+        return JsonResponse(data)
+
+
+class WishListView(ListView):
+    model = User
+    template_name = 'accounts/wishlist.html'
+    context_object_name = 'wishlist'
+
+    def get_queryset(self):
+        return self.request.user.wishlist.all().order_by('-id')

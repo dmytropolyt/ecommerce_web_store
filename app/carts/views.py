@@ -1,11 +1,14 @@
-from django.views.generic import TemplateView, CreateView, View, DeleteView
+from django.views.generic import TemplateView, View, DeleteView
 from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import JsonResponse
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from store.models import Product, Variation
 from .models import Cart, CartItem
+
+from functools import reduce
 
 
 def _cart_id(request):
@@ -49,9 +52,8 @@ class CartView(TemplateView):
 class CartAddView(View):
     """View for adding cart."""
 
-    def post(self, request, *args, **kwargs):
+    def post(self, request, product_id, *args, **kwargs):
         current_user = request.user
-        product_id = kwargs['product_id']
         product = Product.objects.get(id=product_id)
         if current_user.is_authenticated:
             product_variation = []
@@ -97,7 +99,12 @@ class CartAddView(View):
                     cart_item.variations.clear()
                     cart_item.variations.add(*product_variation)
                 cart_item.save()
-            return redirect('carts:cart')
+
+            cart_items_quantity = [
+                i[0] for i in CartItem.objects.filter(user=request.user, is_active=True).values_list('quantity')
+            ]
+            cart_items_count = reduce(lambda a, b: a[0] + b[0], cart_items_quantity)
+            return JsonResponse({'cart_items_count': cart_items_count})
 
         else:
             product_variation = []
@@ -151,7 +158,11 @@ class CartAddView(View):
                     cart_item.variations.clear()
                     cart_item.variations.add(*product_variation)
                 cart_item.save()
-            return redirect('carts:cart')
+
+            cart_items_count = reduce(
+                lambda a, b: a + b, [i[0] for i in cart.cart_item.all().values_list('quantity')]
+            )
+            return JsonResponse({'cart_items_count': cart_items_count})
 
 
 class CartRemoveView(View):
@@ -192,7 +203,7 @@ class CartItemRemoveView(DeleteView):
         return cart_item
 
 
-class CheckoutView(LoginRequiredMixin, TemplateView):
+class CheckoutView(TemplateView):
     template_name = 'store/checkout.html'
 
     def get(self, request, total=0, quantity=0, *args, **kwargs):
