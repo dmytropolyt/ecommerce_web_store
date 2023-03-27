@@ -14,25 +14,43 @@
     <h5>Billing Address</h5>
   </div>
   <div class="card-body">
-    <p class="card-text mb-0">{{ order.full_name }}</p>
-	<p class="card-text mb-0">{{ order.full_address }}</p>
-	<p class="card-text mb-0">{{ order.city }}, {{ order.state }}</p>
-	<p class="card-text mb-0">{{ order.email }}</p>
-	<p class="card-text mb-0">{{ order.phone }}</p>
+	<dl class="dlist-align">
+	  <dt><b>Full Name:</b></dt>
+	  <dd class="text-end">{{ order.full_name }}</dd>
+	</dl>
+	<dl class="dlist-align">
+	  <dt><b>Full Address:</b></dt>
+	  <dd class="text-end">{{ order.full_address }}</dd>
+	</dl>
+	<dl class="dlist-align">
+	  <dt><b>City, State:</b></dt>
+	  <dd class="text-end">{{ order.city }}, {{ order.state }}</dd>
+	</dl>
+	<dl class="dlist-align">
+	  <dt><b>Email:</b></dt>
+	  <dd class="text-end">{{ order.email }}</dd>
+	</dl>
+	<dl class="dlist-align">
+	  <dt><b>Phone Number:</b></dt>
+	  <dd class="text-end">{{ order.phone }}</dd>
+	</dl>
 	{% if order.order_note %}
-	  <b>Order Note: </b> {{ order.order_note }}
+	  <dl class="dlist-align">
+	  <dt><b>Order Note:</b></dt>
+	  <dd class="text-end">{{ order..order_note }}</dd>
+	</dl>
 	{% endif %}
 
   </div>
 </div>
-<div class="card mb-3">
-  <div class="card-header">
-	  <h5>Payment Method</h5>
-  </div>
-  <div class="card-body">
-    <p class="card-text">{{ order.payment.method }}</p>
-  </div>
-</div>
+<!--<div class="card mb-3">-->
+<!--  <div class="card-header">-->
+<!--	  <h5>Payment Method</h5>-->
+<!--  </div>-->
+<!--  <div class="card-body">-->
+<!--    <p class="card-text"> order.payment.method </p>-->
+<!--  </div>-->
+<!--</div>-->
 <div class="card">
   <div class="card-header">
 	  <h5>Review Products</h5>
@@ -67,7 +85,7 @@
 		</td>
 		<td>
 			<!-- col.// -->
-			<label for="">{{ cart_item.quantity }}</label>
+			<label for="" class="text-dark b ps-4">{{ cart_item.quantity }}</label>
 		</td>
 		<td>
 			<div class="price-wrap">
@@ -89,15 +107,15 @@
 		<div class="card-body">
 			<dl class="dlist-align">
 			  <dt>Total price:</dt>
-			  <dd class="text-right">$ {{ total }}</dd>
+			  <dd class="text-end">$ {{ total }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Tax:</dt>
-			  <dd class="text-right"> $ {{ tax }}</dd>
+			  <dd class="text-end"> $ {{ tax }}</dd>
 			</dl>
 			<dl class="dlist-align">
 			  <dt>Total:</dt>
-			  <dd class="text-right text-dark b"><strong>$ {{ grand_total }}</strong></dd>
+			  <dd class="text-end text-dark b"><strong>$ {{ grand_total }}</strong></dd>
 			</dl>
 			<hr>
 			<p class="text-center mb-3">

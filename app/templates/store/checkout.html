@@ -1,7 +1,11 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-
+<style>
+    #id_phone_number {
+        width: 291.5px;
+    }
+</style>
 <section class="section-content padding-y bg">
 <div class="container">
 
@@ -11,51 +15,57 @@
 <div class="card">
     <div class="card-body">
         <h4 class="card-title mb-4">Billing Address</h4>
-        <form action="{% url 'orders:place-order' %}" method="POST">
+        <form action="{% url 'orders:place-order' %}" onsubmit="return addDialCode(this)" id="formBill" method="POST">
             {% csrf_token %}
 
             <div class="row mb-3">
                 <div class="col form-group">
                     <label for="" class="form-label">First Name</label>
-                    <input type="text" name="first_name" class="form-control" required>
+                    {{ form.first_name }}
                 </div>
                 <div class="col form-group">
                     <label for="" class="form-label">Last Name</label>
-                    <input type="text" name="last_name" class="form-control" required>
+<!--                    <input type="text" name="last_name" class="form-control" required>-->
+                    {{ form.last_name }}
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col form-group">
                     <label for="" class="form-label">Email</label>
-                    <input type="text" name="email" class="form-control" required>
+                    {{ form.email }}
+<!--                    <input type="text" name="email" class="form-control" required>-->
                 </div>
                 <div class="col form-group">
                     <label for="" class="form-label">Phone Number</label>
-                    <input type="text" name="phone" class="form-control" required>
+                    {{ form.phone }}
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col form-group">
                     <label for="" class="form-label">Address Line 1</label>
-                    <input type="text" name="address_line_1" class="form-control" required>
+                    {{ form.address_line_1 }}
+<!--                    <input type="text" name="address_line_1" class="form-control" required>-->
                 </div>
                 <div class="col form-group">
                     <label for="" class="form-label">Address Line 2</label>
-                    <input type="text" name="address_line_2" class="form-control">
+                    {{ form.address_line_2 }}
+<!--                    <input type="text" name="address_line_2" class="form-control">-->
                 </div>
             </div>
             <div class="row mb-3">
                 <div class="col form-group">
                     <label for="" class="form-label">City</label>
-                    <input type="text" name="city" class="form-control" required>
+                    {{ form.city }}
+<!--                    <input type="text" name="city" class="form-control" required>-->
                 </div>
                 <div class="col form-group">
                     <label for="" class="form-label">State</label>
-                    <input type="text" name="state" class="form-control" required>
+                    {{ form.state }}
+<!--                    <input type="text" name="state" class="form-control" required>-->
                 </div>
             </div>
             <div class="mb-3">
-                <label for="orderNote" class="form-label">Order Note</label>
+                <label for="" class="form-label">Order Note</label>
                 <textarea name="order_note" rows="2" class="form-control" id="orderNote"></textarea>
             </div>
 
@@ -111,7 +121,7 @@
             </table>
             <div class="row">
                 <div class="d-grid gap-2 col-6">
-                    <button type="submit" name="submit" class="btn btn-primary btn-block me-2">Place Order</button>
+                    <button id="formSubmit" name="submit" class="btn btn-primary btn-block me-2">Place Order</button>
                 </div>
                 <div class="d-grid gap-2 col-6">
                     <a href="{% url 'store:store' %}" class="btn btn-light btn-block">Continue Shopping</a>

@@ -122,8 +122,8 @@ $('#add-to-cart').on('submit', function(e){
         data:{
             csrfmiddlewaretoken: $('input[name=csrfmiddlewaretoken]').val(),
             product_id: product_id,
-            size: size,
             color: color,
+            size: size
         },
         dataType: 'json',
         success: function(res){
@@ -133,3 +133,7 @@ $('#add-to-cart').on('submit', function(e){
     })
 });
 
+function addDialCode(form){
+    $('#id_phone_number').val($('.iti__selected-dial-code').text() + $('#id_phone_number').val());
+    return true;
+};

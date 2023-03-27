@@ -7,6 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 
 from store.models import Product, Variation
 from .models import Cart, CartItem
+from orders.forms import OrderForm
 
 from functools import reduce
 
@@ -65,7 +66,7 @@ class CartAddView(View):
                     product_variation.append(variation)
                 except:
                     pass
-
+            print(product_variation)
             if CartItem.objects.filter(product=product, user=current_user).exists():
                 cart_item = CartItem.objects.filter(product=product, user=current_user)
 
@@ -84,6 +85,7 @@ class CartAddView(View):
 
                 else:
                     item = CartItem.objects.create(product=product, quantity=1, user=current_user)
+                    print('no')
                     if len(product_variation) > 0:
                         item.variations.clear()
                         item.variations.add(*product_variation)
@@ -103,7 +105,7 @@ class CartAddView(View):
             cart_items_quantity = [
                 i[0] for i in CartItem.objects.filter(user=request.user, is_active=True).values_list('quantity')
             ]
-            cart_items_count = reduce(lambda a, b: a[0] + b[0], cart_items_quantity)
+            cart_items_count = reduce(lambda a, b: a + b, cart_items_quantity)
             return JsonResponse({'cart_items_count': cart_items_count})
 
         else:
@@ -206,6 +208,25 @@ class CartItemRemoveView(DeleteView):
 class CheckoutView(TemplateView):
     template_name = 'store/checkout.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        if self.request.user.is_authenticated:
+            initial_dict = {
+                'first_name': self.request.user.first_name,
+                'last_name': self.request.user.last_name,
+                'phone': self.request.user.phone_number,
+                'email': self.request.user.email,
+                'address_line_1': self.request.user.profile.address_line_1,
+                'address_line_2': self.request.user.profile.address_line_2,
+                'state': self.request.user.profile.state,
+                'city': self.request.user.profile.city,
+            }
+            context['form'] = OrderForm(initial=initial_dict)
+        else:
+            context['form'] = OrderForm
+
+        return context
+
     def get(self, request, total=0, quantity=0, *args, **kwargs):
         try:
             tax, grand_total = 0, 0
@@ -230,4 +251,4 @@ class CheckoutView(TemplateView):
             'grand_total': grand_total,
             'tax': tax,
         }
-        return render(request, self.template_name, context)
+        return render(request, self.template_name, self.get_context_data(**context))

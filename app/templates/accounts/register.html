@@ -2,6 +2,12 @@
 
 
 {% block content %}
+<style>
+	#id_phone_number {
+		width: 232.75px;
+	}
+</style>
+
 <section class="section-content padding-y">
 
 <!-- ============================ COMPONENT REGISTER   ================================= -->
@@ -9,7 +15,7 @@
       <article class="card-body">
 	  	{% include 'includes/alerts.html' %}
 		<header class="mb-4"><h4 class="card-title">Sign up</h4></header>
-		<form action="{% url 'register' %}" method="POST">
+		<form action="{% url 'register' %}" onsubmit="return addDialCode(this)" method="POST">
 			{% csrf_token %}
 			<div class="row mb-3">
 				<div class="col form-group">

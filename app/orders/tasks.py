@@ -11,10 +11,9 @@ def send_order_email(data: dict):
     """
     mail_subject = 'Thank you for your order!'
     message = render_to_string('orders/order_received_email.html', {
-        'user': data['user'],
         'order': data['order'],
     })
-    to_email = data['user'].email
+    to_email = data['order'].email
 
     send_mail(
         mail_subject, message, from_email=settings.DEFAULT_FROM_EMAIL,

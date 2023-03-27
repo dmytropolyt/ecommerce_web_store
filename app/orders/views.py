@@ -1,10 +1,11 @@
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView, View
-from carts.models import CartItem
+from carts.models import CartItem, Cart
 from carts.views import _cart_id
 from .forms import OrderForm
 from .models import Order, Payment, OrderProduct
 from store.models import Product
+from django.contrib import messages
 
 import datetime
 from liqpay import LiqPay
@@ -26,56 +27,64 @@ class PaymentsView(TemplateView):
         if data['status'] == 'success':
             order = Order.objects.get(is_ordered=False, order_number=data['order_id'])
             payment = Payment(
-                user=order.user,
                 payment_id=data['payment_id'],
                 method=data['paytype'],
                 amount_paid=order.order_total,
                 status=data['status'],
             )
+            if order.user:
+                payment.user = order.user
+                cart_items = CartItem.objects.filter(user=order.user)
+            else:
+                cart_items = CartItem.objects.filter(cart=data['info'])
+
             payment.save()
 
             order.payment = payment
             order.is_ordered = True
             order.save()
 
-        # Move the cart items to OrderProduct model
-        cart_items = CartItem.objects.filter(cart=_cart_id())
+            # Move the cart items to OrderProduct model
 
-        for item in cart_items:
-            order_product = OrderProduct()
-            order_product.order_id = order.pk
-            order_product.payment = payment
-            order_product.user = order.user
-            order_product.product_id = item.product_id
-            order_product.quantity = item.quantity
-            order_product.product_price = item.product.price
-            order_product.ordered = True
-            order_product.save()
+            for item in cart_items:
+                order_product = OrderProduct()
+                order_product.order_id = order.pk
+                order_product.payment = payment
+                order_product.user = order.user
+                order_product.product_id = item.product_id
+                order_product.quantity = item.quantity
+                order_product.product_price = item.product.price
+                order_product.ordered = True
+                order_product.save()
 
-            cart_item = CartItem.objects.get(id=item.id)
-            product_variation = cart_item.variations.all()
-            order_product.variations.set(product_variation)
-            order_product.save()
+                cart_item = CartItem.objects.get(id=item.id)
+                product_variation = cart_item.variations.all()
+                order_product.variations.set(product_variation)
+                order_product.save()
 
-            # Reduce the quantity of the sold products
-            product = Product.objects.get(id=item.product_id)
-            product.stock -= item.quantity
-            product.save()
+                # Reduce the quantity of the sold products
+                product = Product.objects.get(id=item.product_id)
+                product.stock -= item.quantity
+                product.save()
 
-        # Clear cart
-        cart_items.delete()
+            # Clear cart
+            cart_items.delete()
 
-        # Send order received email to customer
-        send_order_email({'user': order.user, 'order': order})
+            # Send order received email to customer
+            send_order_email({'order': order})
 
-        data = {
-            'order_number': order.order_number,
-            'payment_id': payment.payment_id,
-        }
+            data = {
+                'order_number': order.order_number,
+                'payment_id': payment.payment_id,
+            }
 
-        return redirect(
-            f"/orders/order-complete/?order_number={data['order_number']}&payment_id={data['payment_id']}"
-        )
+            return redirect(
+                f"/orders/order-complete/?order_number={data['order_number']}&payment_id={data['payment_id']}"
+            )
+
+        else:
+            messages.error(request, 'Something went wrong, please verify the information and try again.')
+            return redirect('orders:place-order')
 
 
 class PlaceOrderView(TemplateView):
@@ -83,34 +92,36 @@ class PlaceOrderView(TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['cart_items'] = CartItem.objects.filter(cart__cart_id=_cart_id(self.request))
+        if self.request.user.is_authenticated:
+            context['cart_items'] = CartItem.objects.filter(user=self.request.user)
+        else:
+            context['cart_items'] = CartItem.objects.filter(cart__cart_id=_cart_id(self.request))
+
         return context
 
     def get(self, request, *args, **kwargs):
         cart_items = self.get_context_data()['cart_items']
 
-        cart_count = cart_items.count()
-        if cart_count <= 0:
+        if cart_items.count() <= 0:
             return redirect('store:store')
         else:
             return redirect('carts:checkout')
 
     def post(self, request, total=0, quantity=0, *args, **kwargs):
         cart_items = self.get_context_data()['cart_items']
-        tax, grand_total = 0, 0
         for cart_item in cart_items:
             total += (cart_item.product.price * cart_item.quantity)
             quantity += cart_item.quantity
         tax = 2 * total / 100
         grand_total = total + tax
-
+        print(request.POST)
         form = OrderForm(request.POST)
         if form.is_valid():
             # Store all the billing information inside Order table
             order = form.save(commit=False)
 
             # Check user exist
-            if request.user.is_authenticated():
+            if request.user.is_authenticated:
                 order.user = request.user
 
             order.order_total = grand_total
@@ -127,7 +138,7 @@ class PlaceOrderView(TemplateView):
             liqpay = LiqPay(settings.LIQPAY_PUBLIC_KEY, settings.LIQPAY_PRIVATE_KEY)
             result_url = f'http://{str(get_current_site(request))}/orders/payments/'
 
-            liqpay_form = liqpay.cnb_form({
+            liqpay_data = {
                 'action': 'pay',
                 'amount': order.order_total,
                 'currency': 'USD',
@@ -137,7 +148,11 @@ class PlaceOrderView(TemplateView):
                 'language': 'en',
                 'result_url': result_url,
                 'server_url': result_url,
-            })
+            }
+            if not request.user.is_authenticated:
+                liqpay_data['info'] = Cart.objects.get(cart_id=_cart_id(request)).pk
+
+            liqpay_form = liqpay.cnb_form(liqpay_data)
 
             to_context = {
                 'order': order,

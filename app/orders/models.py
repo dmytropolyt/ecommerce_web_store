@@ -7,7 +7,7 @@ User = get_user_model()
 
 
 class Payment(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     payment_id = models.CharField(max_length=100)
     method = models.CharField(max_length=100)
     amount_paid = models.CharField(max_length=100)
@@ -60,7 +60,7 @@ class Order(models.Model):
 class OrderProduct(models.Model):
     order = models.ForeignKey(Order, related_name='order_product', on_delete=models.CASCADE)
     payment = models.ForeignKey(Payment, on_delete=models.SET_NULL, blank=True, null=True)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     product = models.ForeignKey(Product, related_name='order_product', on_delete=models.CASCADE)
     variations = models.ManyToManyField(Variation, blank=True)
     quantity = models.IntegerField()
