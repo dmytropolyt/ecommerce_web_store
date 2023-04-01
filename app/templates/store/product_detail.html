@@ -48,44 +48,55 @@
 
 
 			<hr>
-				<form id="add-to-cart" method="POST">
-				{% csrf_token %}
-					<div class="row">
-						<div class="item-option-select">
-							<h6>Choose Color</h6>
-								<select name="color" class="form-control" id="product-color" style="width: 120px;" required>
-									<option value="" disabled selected>Select</option>
-									{% for i in single_product.variation_set.colors %}
-									<option value="{{ i.value | lower }}">{{ i.value|capfirst }}</option>
-									{% endfor %}
-								</select>
-						</div>
-					</div> <!-- row.// -->
-					<div class="row">
-						<div class="item-option-select">
-							<h6>Select Size</h6>
-								<select name="size" class="form-control" id="product-size" style="width: 120px;" required>
-									<option value="" disabled selected>Select</option>
+				<div class="row">
+					<div class="col-md-3">
+						<form id="add-to-cart" method="POST" style="width: 567.5px;">
+						{% csrf_token %}
+							<div class="row">
+								<div class="item-option-select">
+									<h6>Choose Color</h6>
+										<select name="color" class="form-control" id="product-color" style="width: 120px;" required>
+											<option value="" disabled selected>Select</option>
+											{% for i in single_product.variation_set.colors %}
+											<option value="{{ i.value | lower }}">{{ i.value|capfirst }}</option>
+											{% endfor %}
+										</select>
+								</div>
+							</div> <!-- row.// -->
+							<div class="row">
+								<div class="select-size-buttons">
+									<h6>Select Size</h6>
 									{% for i in single_product.variation_set.sizes %}
-									<option value="{{ i.value|lower }}">{{ i.value|capfirst }}</option>
+										<input type="radio" class="btn-check" name="sizes" id="btn-check-{{ i.value|lower }}" value="{{ i.value }}" autocomplete="off" required>
+										<label class="btn btn-outline-primary me-1" for="btn-check-{{ i.value|lower }}">{{ i.value }}</label>
 									{% endfor %}
-								</select>
-						</div>
-					</div> <!-- row.// -->
-					<hr>
-					{% if single_product.stock <= 0 %}
-						<h5 class="text-danger">Out of Stock</h5>
-					{% else %}
-						<button type="submit" class="btn btn-primary add-to-cart" data-product="{{ single_product.id }}">
-							<span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </button>
-					{% endif %}
-				</form>
+<!--										<select name="size" class="form-control" id="product-size" style="width: 120px;" required>-->
+<!--											<option value="" disabled selected>Select</option>-->
+<!--											 for i in single_product.variation_set.sizes -->
+<!--											<option value=" i.value|lower "> i.value|capfirst </option>-->
+<!--											 endfor -->
+<!--										</select>-->
+								</div>
+							</div> <!-- row.// -->
+							<hr>
+
+						</form>
+
+					</div>
+				</div>
+				{% if single_product.stock <= 0 %}
+					<h5 class="text-danger">Out of Stock</h5>
+				{% else %}
+					<button type="submit" form="add-to-cart" class="btn btn-primary add-to-cart" data-product="{{ single_product.id }}" style="width: 150px;">
+						<span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </button>
+				{% endif %}
+
 				{% if user in single_product.users_wishlist.all %}
 					{% csrf_token %}
-					<button class="btn btn-light add-to-wishlist added-to-wishlist mt-2" id="wish" data-product="{{ single_product.id }}">
+					<button class="btn btn-light add-to-wishlist added-to-wishlist" id="wish" data-product="{{ single_product.id }}">
 						<span class="text">In wishlist</span><i class="fa fa-heart"></i></button>
 				{% else %}
-					<button class="btn btn-light add-to-wishlist mt-2" id="wish" data-product="{{ single_product.id }}">
+					<button class="btn btn-light add-to-wishlist" id="wish" data-product="{{ single_product.id }}">
 						<span class="text">Add to wishlist</span><i class="fa fa-heart"></i></button>
 				{% endif %}
 
@@ -155,7 +166,7 @@
 	{% for review in reviews.all %}
 	<article class="box mb-3">
 		<div class="icontext w-100">
-			<img src="{% static './images/avatars/avatar1.jpg' %}" class="img-xs icon rounded-circle">
+			<img src="{{ review.user.profile.picture.url }}" class="img-xs icon rounded-circle border">
 			<div class="text">
 				<span class="date text-muted float-md-right">{{ review.updated_at }}</span>
 				<h6 class="mb-1">{{ review.user.full_name }} </h6>

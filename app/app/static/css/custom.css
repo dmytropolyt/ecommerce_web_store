@@ -67,10 +67,18 @@ ul.thumb li img{
     color: red;
 }
 
-#wish {
-    width: 130.5px;
-}
+
 
 #id_phone_number {
     width: 456.5px;
+}
+
+.select-size-buttons {
+    margin-bottom: 1rem;
+    display: inline-block;
+    margin-right: 15px;
+}
+
+.select-size-buttons input[type="radio"] {
+  display: none;
 }

@@ -114,7 +114,7 @@ $('#add-to-cart').on('submit', function(e){
     e.preventDefault();
     var product_id = $('.add-to-cart').data('product');
     var cart_count = $('#cart_count');
-    var size = $('#product-size').val();
+    var size = $('input[name=sizes]:checked').val();
     var color = $('#product-color').val();
     $.ajax({
         url: `/cart/add-cart/${product_id}/`,
@@ -128,7 +128,6 @@ $('#add-to-cart').on('submit', function(e){
         dataType: 'json',
         success: function(res){
             cart_count.text(res['cart_items_count']);
-            console.log(res);
         }
     })
 });

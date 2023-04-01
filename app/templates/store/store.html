@@ -3,17 +3,18 @@
 
 {% block content %}
 <!-- ========================= SECTION PAGETOP ========================= -->
+{% if 'search' in request.path %}
 <section class="section-pagetop bg">
 <div class="container">
-	{% if 'search' in requst.path %}
+
 	<!-- Search result -->
 	<h2 class="title-page">Search Result</h2>
-	{% else %}
-	<h2 class="title-page">Our Store</h2>
-	{% endif %}
+<!--	<h2 class="title-page">Our Store</h2>-->
+
 
 </div> <!-- container //  -->
 </section>
+{% endif %}
 <!-- ========================= SECTION INTRO END// ========================= -->
 
 <!-- ========================= SECTION CONTENT ========================= -->
@@ -54,23 +55,69 @@
 		<div class="filter-content collapse show" id="collapse_4" style="">
 			<div class="card-body">
 			  <label class="checkbox-btn">
-			    <input type="checkbox">
-			    <span class="btn btn-light"> XS </span>
+			    <form id="filterSizeXs" action="{{ request.get_full_path }}" method="GET">
+					{% if request.GET.start_price and request.GET.end_price %}
+						<input type="hidden" name="start_price" value="{{ request.GET.start_price }}">
+						<input type="hidden" name="end_price" value="{{ request.GET.end_price }}">
+					{% endif %}
+					<input type="checkbox" value="XS" name="size" {% if size_filter == 'XS' %}checked{% endif %}>
+					<span class="btn btn-outline-primary"> XS </span>
+				</form>
 			  </label>
 
 			  <label class="checkbox-btn">
-			    <input type="checkbox">
-			    <span class="btn btn-light"> SM </span>
+			    <form id="filterSizeS" action="{{ request.get_full_path }}" method="GET">
+					{% if request.GET.start_price and request.GET.end_price %}
+						<input type="hidden" name="start_price" value="{{ request.GET.start_price }}">
+						<input type="hidden" name="end_price" value="{{ request.GET.end_price }}">
+					{% endif %}
+					<input type="checkbox" value="S" name="size" {% if size_filter == 'S' %}checked{% endif %}>
+					<span class="btn btn-outline-primary"> S </span>
+				</form>
 			  </label>
 
 			  <label class="checkbox-btn">
-			    <input type="checkbox">
-			    <span class="btn btn-light"> LG </span>
+				<form id="filterSizeM" action="{{ request.get_full_path }}" method="GET">
+					{% if request.GET.start_price and request.GET.end_price %}
+						<input type="hidden" name="start_price" value="{{ request.GET.start_price }}">
+						<input type="hidden" name="end_price" value="{{ request.GET.end_price }}">
+					{% endif %}
+					<input type="checkbox" value="M" name="size" {% if size_filter == 'M' %}checked{% endif %}>
+					<span class="btn btn-outline-primary"> M </span>
+				</form>
 			  </label>
 
 			  <label class="checkbox-btn">
-			    <input type="checkbox">
-			    <span class="btn btn-light"> XXL </span>
+			    <form id="filterSizeL" action="{{ request.get_full_path }}" method="GET">
+					{% if request.GET.start_price and request.GET.end_price %}
+						<input type="hidden" name="start_price" value="{{ request.GET.start_price }}">
+						<input type="hidden" name="end_price" value="{{ request.GET.end_price }}">
+					{% endif %}
+					<input type="checkbox" value="L" name="size" {% if size_filter == 'L' %}checked{% endif %}>
+					<span class="btn btn-outline-primary"> L </span>
+				</form>
+			  </label>
+
+			  <label class="checkbox-btn">
+			    <form id="filterSizeXl" action="{{ request.get_full_path }}" method="GET">
+					{% if request.GET.start_price and request.GET.end_price %}
+						<input type="hidden" name="start_price" value="{{ request.GET.start_price }}">
+						<input type="hidden" name="end_price" value="{{ request.GET.end_price }}">
+					{% endif %}
+					<input type="checkbox" value="XL" name="size" {% if size_filter == 'XL' %}checked{% endif %}>
+					<span class="btn btn-outline-primary"> XL </span>
+				</form>
+			  </label>
+
+			  <label class="checkbox-btn">
+			    <form id="filterSizeXXl" action="{{ request.get_full_path }}" method="GET">
+					{% if request.GET.start_price and request.GET.end_price %}
+						<input type="hidden" name="start_price" value="{{ request.GET.start_price }}">
+						<input type="hidden" name="end_price" value="{{ request.GET.end_price }}">
+					{% endif %}
+					<input type="checkbox" value="XXL" name="size" {% if size_filter == 'XXL' %}checked{% endif %}>
+					<span class="btn btn-outline-primary"> XXL </span>
+				</form>
 			  </label>
 		</div><!-- card-body.// -->
 		</div>
@@ -85,12 +132,16 @@
 		</header>
 		<div class="filter-content collapse show" id="collapse_3" style="">
 			<div class="card-body">
+			<form action="{{ request.get_full_path }}" method="GET">
+				{% if request.GET.size %}
+					<input type="hidden" name="size" value="{{ request.GET.size }}" />
+				{% endif %}
 
-				<div class="form-row mb-3">
+				<div class="row mb-3">
 				<div class="form-group col-md-6 mb-3">
 				  <label class="form-label">Min</label>
 				  <!-- <input class="form-control" placeholder="$0" type="number"> -->
-				  	<select class="me-2 form-control">
+				  	<select name="start_price" id="startPrice" class="me-2 form-control">
 						<option value="0">$0</option>
 						<option value="50">$50</option>
 						<option value="100">$100</option>
@@ -102,7 +153,7 @@
 				</div>
 				<div class="form-group text-right col-md-6">
 				  <label class="form-label">Max</label>
-				  	<select class="me-2 form-control mb-3">
+				  	<select name="end_price" id="endPrice" class="me-2 form-control mb-3">
 						<option value="50">$50</option>
 						<option value="100">$100</option>
 						<option value="150">$150</option>
@@ -113,7 +164,8 @@
 					</select>
 				</div>
 				</div> <!-- form-row.// -->
-				<button class="btn btn-block btn-primary">Apply</button>
+				<button type="submit" id="filterPriceBtn" class="btn btn-block btn-primary">Apply</button>
+			</form>
 			</div><!-- card-body.// -->
 		</div>
 	</article> <!-- filter-group .// -->
@@ -124,8 +176,8 @@
 	<main class="col-md-9">
 
 <header class="border-bottom mb-4 pb-3">
-		<div class="form-inline">
-			<span class="me-md-auto"><b>{{ product_count }}</b> Items found</span>
+		<div class="form-inline" style="font-size: 20px;">
+			<span class="me-md-auto"><b>{{ product_count }}</b> Items found in {{ category }}</span>
 
 		</div>
 </header><!-- sect-heading -->
@@ -180,8 +232,7 @@
 		<h2>No result found. Please try again.</h2>
 	</div>
 	{% endif %}
-</div> <!-- row end.// -->
-
+</div>
 <nav class="mt-4" aria-label="Page navigation sample">
 	{% if is_paginated %}
   <ul class="pagination">
@@ -215,4 +266,26 @@
 </div> <!-- container .//  -->
 </section>
 <!-- ========================= SECTION CONTENT END// ========================= -->
+{% endblock %}
+
+{% block js %}
+<script>
+	$(document).ready(function(){
+		$("form[id^='filterSize']").each(function(i, el) {
+			$('#' + el.getAttribute('id')).on('change', 'input:checkbox', function(){
+				$(this).closest('form').submit();
+			})
+		})
+	});
+
+	$(document).ready(function(){
+		const urlParams = new URLSearchParams(window.location.search);
+		if (urlParams.has('start_price') && urlParams.has('end_price')){
+			var start_price = urlParams.get('start_price');
+			var end_price = urlParams.get('end_price');
+			$('#startPrice').find('option[value="' + start_price + '"]').attr('selected', 'selected');
+			$('#endPrice').find('option[value="' + end_price + '"]').attr('selected', 'selected');
+		}
+	})
+</script>
 {% endblock %}

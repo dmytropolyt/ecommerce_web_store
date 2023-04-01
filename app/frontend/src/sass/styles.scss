@@ -1,0 +1,11 @@
+@import "~bootstrap/scss/bootstrap";
+
+$mynewcolor:#FC46AA;
+
+.btn-primary {
+    @include button-variant($mynewcolor, darken($mynewcolor, 7.5%), #FFFFFF, lighten($mynewcolor,5%), lighten($mynewcolor, 10%), darken($mynewcolor,30%));
+}
+
+.btn-outline-primary {
+    @include button-outline-variant($mynewcolor, #FFFFFF, lighten($mynewcolor,5%), $mynewcolor);
+}

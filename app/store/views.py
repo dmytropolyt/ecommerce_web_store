@@ -27,15 +27,34 @@ class StoreView(ListView):
         try:
             if self.kwargs['category_slug']:
                 category = get_object_or_404(Category, slug=self.kwargs['category_slug'])
-                return Product.objects.filter(category=category, is_available=True).order_by('id')
+                queryset = Product.objects.filter(category=category, is_available=True).order_by('-modified_date')
+
         except KeyError:
-            return Product.objects.filter(is_available=True).order_by('id')
+            queryset = Product.objects.filter(is_available=True).order_by('-modified_date')
         else:
-            return Product.objects.filter(is_available=True).order_by('id')
+            queryset = Product.objects.filter(is_available=True).order_by('-modified_date')
+
+        if self.request.GET.get('size'):
+            queryset = queryset.filter(variation__value=self.request.GET.get('size')).order_by('-modified_date')
+
+        if self.request.GET.get('start_price') and self.request.GET.get('end_price'):
+            queryset = queryset.filter(
+                price__range=(self.request.GET.get('start_price'), self.request.GET.get('end_price'))
+            ).order_by('-modified_date')
+
+        return queryset
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['product_count'] = self.get_queryset().count()
+        try:
+            context['category'] = self.kwargs['category_slug'].capitalize()
+        except KeyError:
+            context['category'] = 'All Products'
+
+        if self.request.GET.get('size'):
+            context['size_filter'] = self.request.GET.get('size')
+
         return context
 
 
@@ -86,12 +105,12 @@ class SearchView(View):
                 ).order_by('-created_date')
                 product_count = products.count()
 
-        context = {
-            'products': products,
-            'product_count': product_count,
-        }
+            context = {
+                'products': products,
+                'product_count': product_count,
+            }
 
-        return render(request, 'store/store.html', context)
+            return render(request, 'store/store.html', context)
 
 
 class SubmitReviewView(CreateView):
@@ -134,7 +153,7 @@ class AddWishListView(LoginRequiredMixin, View):
         return JsonResponse(data)
 
 
-class WishListView(ListView):
+class WishListView(LoginRequiredMixin, ListView):
     model = User
     template_name = 'accounts/wishlist.html'
     context_object_name = 'wishlist'
