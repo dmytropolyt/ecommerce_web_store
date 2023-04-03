@@ -4,9 +4,9 @@ from celery import Celery
 from django.conf import settings
 from django.apps import apps
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'django_air_erp_system.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'app.settings')
 
-app = Celery('django_air')
+app = Celery('app')
 
 app.config_from_object(settings, namespace='CELERY')
 

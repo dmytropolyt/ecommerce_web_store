@@ -50,7 +50,7 @@ INSTALLED_APPS = [
     'django_celery_beat',
     'django_celery_results',
     'category',
-    'accounts',
+    'accounts.apps.AccountsConfig',
     'store',
     'carts',
     'orders',
@@ -71,7 +71,7 @@ ROOT_URLCONF = 'app.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': ['templates'],
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

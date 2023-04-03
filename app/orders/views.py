@@ -71,7 +71,7 @@ class PaymentsView(TemplateView):
             cart_items.delete()
 
             # Send order received email to customer
-            send_order_email({'order': order})
+            send_order_email.delay({'order': order})
 
             data = {
                 'order_number': order.order_number,

@@ -7,6 +7,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages, auth
 from .forms import RegistrationForm, ForgotPasswordForm, EditUserForm, EditUserProfileForm, ChangePasswordForm
 from .models import UserProfile
+from .tasks import send_activation_email
 
 from django.contrib.sites.shortcuts import get_current_site
 from django.template.loader import render_to_string
@@ -45,8 +46,9 @@ class RegisterView(CreateView):
             'token': default_token_generator.make_token(user),
         })
         to_email = user.email
-        send_mail = EmailMessage(mail_subject, message, to=[to_email])
-        send_mail.send()
+        send_activation_email.delay(mail_subject, message, to_email)
+        # send_mail = EmailMessage(mail_subject, message, to=[to_email])
+        # send_mail.send()
         # messages.success(self.request, 'Thank you for registering.'
         #                                'We have sent you a verification email to your email address.'
         #                                'Please verify your email.'
