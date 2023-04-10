@@ -114,7 +114,7 @@ class PlaceOrderView(TemplateView):
             quantity += cart_item.quantity
         tax = 2 * total / 100
         grand_total = total + tax
-        print(request.POST)
+
         form = OrderForm(request.POST)
         if form.is_valid():
             # Store all the billing information inside Order table

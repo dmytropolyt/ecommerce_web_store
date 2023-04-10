@@ -2,17 +2,17 @@
 Tests for accounts app.
 """
 import pytest
+from pytest_django.asserts import assertContains
 
 from django.urls import reverse
-
-from accounts.tasks import send_activation_email
+from django.core.files.uploadedfile import SimpleUploadedFile
+from PIL import Image
 
 
 @pytest.mark.django_db
 class TestAccounts:
 
-    @pytest.mark.celery(result_backend='rpc')
-    def test_register(self, client, django_user_model, mailoutbox, celery_worker, celery_app):
+    def test_register_and_activation(self, client, django_user_model, mailoutbox, celery_app, celery_worker):
         """Test user registration, email activation."""
         url = reverse('register')
         response = client.get(url)
@@ -30,8 +30,7 @@ class TestAccounts:
         response = client.post('/accounts/register/', payload)
 
         assert response.status_code == 302
-        send_activation_email.delay('subject', 'rap', 'test@example.com')
-        print(mailoutbox)
+
         mail = mailoutbox[0]
         assert mail.subject == 'Please activate your account.'
         assert list(mail.to) == [payload['email']]
@@ -66,5 +65,102 @@ class TestAccounts:
 
         assert response.status_code == 302
         assert response.url == reverse('login')
+
+    def test_password_reset(self, django_user_model, client_user, mailoutbox, celery_app, celery_worker):
+        """Test user reset password view."""
+        url = reverse('password-reset')
+        response = client_user.get(url)
+        # Test GET request
+        assert response.status_code == 200
+
+        response = client_user.post(reverse('password-reset'), {'email': 'test12@example.com'})
+        mail = mailoutbox[0]
+        user = django_user_model.objects.get(email='test12@example.com')
+        # Test POST request
+        assert response.status_code == 302
+        assert len(mailoutbox) == 1
+        assert mail.subject == 'Reset Your Password.'
+        assert list(mail.to) == ['test12@example.com']
+        assert user.email == 'test12@example.com'
+
+        uid = response.context['uid']
+        token = response.context['token']
+        response = client_user.get(reverse('password-reset-confirm', args=[uid, token]))
+        # Test reset password url
+        assert response.status_code == 302
+
+        response = client_user.post(
+            reverse('password-reset-confirm', args=[uid, 'set-password']),
+            {'new_password1': 'test-pass12q', 'new_password2': 'test-pass12q'}
+        )
+        # Test password change
+        assert response.status_code == 302
+        assert response.url == reverse('login')
+
+        client_user.login(email='test12@example.com', password='test-pass12q')
+        response = client_user.get(reverse('dashboard'))
+        # Test login user with new password
+        assert response.status_code == 200
+        # Test login with old password
+        client_user.logout()
+        client_user.login(username='dmytrotest', password='strong-test-pass12')
+        response = client_user.get(reverse('dashboard'))
+
+        assert response.status_code == 302
+
+    def test_change_password(self, client, client_user_login):
+        """Test change user's password."""
+        url = reverse('change-password')
+        response = client_user_login.get(url)
+        # Test when user is logged in
+        assert response.status_code == 200
+
+        response = client_user_login.post(
+            url,
+            {
+                'old_password': 'strong-test-pass12',
+                'new_password1': 'test-pass12q',
+                'new_password2': 'test-pass12q'
+            }
+        )
+        # Test change password
+        assert response.status_code == 302
+
+        client_user_login.logout()
+        client.login(email='test12@example.com', password='test-pass12q')
+        response = client.get(reverse('dashboard'))
+        # Test login and login required url with new password
+        assert response.status_code == 200
+
+    def test_edit_profile(self, client_user_login, django_user_model):
+        """Test edit profile view."""
+        url = reverse('edit-profile')
+        response = client_user_login.get(url)
+        # Test get request
+        assert response.status_code == 200
+
+        image = Image.new('RGB', (300, 300), color='red')
+
+        image_file = SimpleUploadedFile('red_image.png', image.tobytes(), content_type='image/png')
+        payload = {
+            'first_name': 'Testuser',
+            'last_name': 'Testuser',
+            'phone_number': '',
+            'picture': '',
+            'address_line_1': 'street Test',
+            'address_line_2': '2',
+            'city': 'Testcity',
+            'state': 'Teststate'
+        }
+
+        response = client_user_login.post(url, payload)
+        # Test post request
+        assert response.status_code == 302
+        assertContains(response, 'Your profile has been updated.')
+
+        response = client_user_login.get(url)
+        for value in payload.values():
+            assertContains(response, value)
+
 
 

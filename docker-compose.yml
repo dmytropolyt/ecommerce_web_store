@@ -1,0 +1,67 @@
+version: "3.9"
+
+services:
+
+  redis:
+    image: redis:alpine
+    container_name: redis
+
+  app:
+    build:
+      context: .
+      args:
+        - DEV=true
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app
+      - dev-static-data:/vol/web
+    command: >
+      sh -c "python manage.py migrate && 
+             python manage.py runserver 0.0.0.0:8000"
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+
+  db:
+    image: postgres:14-alpine
+    volumes:
+      - dev-db-data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=ecommerce_web_store
+      - POSTGRES_USER=dbdmytro
+      - POSTGRES_PASSWORD=db_django
+
+  celery:
+    restart: always
+    build:
+      context: .
+    command: celery -A app worker -l info
+    volumes:
+      - ./app:/app
+    container_name: celery
+    env_file:
+      - ./.env
+    depends_on:
+      - db
+      - redis
+      - app
+
+  celery-beat:
+    restart: always
+    build:
+      context: .
+    command: celery -A app beat -l info
+    volumes:
+      - ./app:/app
+    env_file:
+      - ./.env
+    depends_on:
+      - celery
+
+
+volumes:
+  dev-db-data:
+  dev-static-data:

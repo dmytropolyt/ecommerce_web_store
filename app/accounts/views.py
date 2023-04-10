@@ -14,7 +14,6 @@ from django.template.loader import render_to_string
 from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode
 from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
-from django.core.mail import EmailMessage
 
 from carts.models import Cart, CartItem
 from orders.models import Order, OrderProduct
@@ -195,8 +194,10 @@ class EditProfileView(LoginRequiredMixin, TemplateView):
             messages.success(request, 'Your profile has been updated.')
             return redirect('edit-profile')
 
+        return render(request, self.template_name, context=self.get_context_data())
 
-class ChangePasswordView(PasswordChangeView):
+
+class ChangePasswordView(LoginRequiredMixin, PasswordChangeView):
     template_name = 'accounts/change_password.html'
     form_class = ChangePasswordForm
     success_url = reverse_lazy('change-password')
@@ -228,9 +229,6 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
 class AccountPasswordResetView(TemplateView):
     template_name = 'accounts/password_reset.html'
 
-    # def get(self, request, *args, **kwargs):
-    #     return render('acccount/password_reset.html')
-
     def post(self, request, *args, **kwargs):
         email = request.POST['email']
         if User.objects.filter(email=email).exists():
@@ -245,8 +243,9 @@ class AccountPasswordResetView(TemplateView):
                 'token': default_token_generator.make_token(user),
             })
             to_email = user.email
-            send_mail = EmailMessage(mail_subject, message, to=[to_email])
-            send_mail.send()
+            send_activation_email.delay(mail_subject, message, to_email)
+            # send_mail = EmailMessage(mail_subject, message, to=[to_email])
+            # send_mail.send()
 
             messages.success(request, 'Password reset email has been sent to your email address.')
 

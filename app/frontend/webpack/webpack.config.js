@@ -67,9 +67,5 @@ module.exports = {
         }),
         new BundleTracker({filename: './webpack-stats.json'})
     ],
-    mode: 'development',
-    watch: true,
-      watchOptions: {
-        ignored: ../node_modules/,
-      },
+    mode: 'development'
 }

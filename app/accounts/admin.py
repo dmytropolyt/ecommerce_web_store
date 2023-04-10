@@ -15,6 +15,15 @@ class AccountAdmin(UserAdmin):
     ordering = ('-date_joined',)
     filter_horizontal = ()
     list_filter = ()
+    add_fieldsets = (
+        (
+            None,
+            {
+                "classes": ("wide",),
+                "fields": ("email", "username", "phone_number", "first_name", "last_name", "password1", "password2"),
+            },
+        ),
+    )
     fieldsets = ()
 
 

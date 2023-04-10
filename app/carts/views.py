@@ -3,7 +3,6 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.urls import reverse_lazy
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
-from django.contrib.auth.mixins import LoginRequiredMixin
 
 from store.models import Product, Variation
 from .models import Cart, CartItem
@@ -66,7 +65,7 @@ class CartAddView(View):
                     product_variation.append(variation)
                 except:
                     pass
-            print(product_variation)
+
             if CartItem.objects.filter(product=product, user=current_user).exists():
                 cart_item = CartItem.objects.filter(product=product, user=current_user)
 
@@ -85,7 +84,7 @@ class CartAddView(View):
 
                 else:
                     item = CartItem.objects.create(product=product, quantity=1, user=current_user)
-                    print('no')
+
                     if len(product_variation) > 0:
                         item.variations.clear()
                         item.variations.add(*product_variation)
