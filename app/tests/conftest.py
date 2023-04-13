@@ -6,9 +6,12 @@ import pytest
 from django.urls import reverse
 from django.core.files.uploadedfile import SimpleUploadedFile
 from PIL import Image
+import base64
+import json
 
 from category.models import Category
 from store.models import Product, Variation
+from orders.models import Order
 
 
 pytest_plugins = ("celery.contrib.pytest", )
@@ -101,6 +104,84 @@ def cart_products(db, product, client, request):
 
 
 @pytest.fixture
+def cart_products_login(db, product, client_user_login):
+    products = [product(name='Coat'), product(name='Jacket'), product(name='Shirt')]
+    client = client_user_login
+    for i in products:
+        client.post(reverse('carts:add-cart', args=[i.id]), {'color': 'Red'})
+
+    yield client
+
+    for i in products:
+        i.image.delete()
+
+
+@pytest.fixture
+def place_order(db, cart_products):
+    client = cart_products
+    payload = {
+        'first_name': 'Test',
+        'last_name': 'Test',
+        'email': 'test1@example.com',
+        'phone': '+380999969696',
+        'address_line_1': 'street Test',
+        'city': 'Kyiv',
+        'state': 'Kyiv',
+    }
+    client.post(reverse('orders:place-order'), payload)
+
+    return client
+
+
+@pytest.fixture
+def place_order_login(db, cart_products_login):
+    client = cart_products_login
+    payload = {
+        'first_name': 'test',
+        'last_name': 'test',
+        'email': 'test12@example.com',
+        'phone': '+380967899090',
+        'address_line_1': 'street Test',
+        'city': 'Kyiv',
+        'state': 'Kyiv',
+    }
+    client.post(reverse('orders:place-order'), payload)
+
+    return client
+
+
+@pytest.fixture
+def payment_success(db, place_order):
+    client = place_order
+    order_number = Order.objects.get(pk=1).order_number
+    data = {
+        'payment_id': 2277196704, 'status': 'success',
+        'paytype': 'privat24', 'order_id': order_number,
+        'info': 1
+    }
+
+    data = base64.b64encode(json.dumps(data).encode("utf-8")).decode("ascii")
+    response = client.post(reverse('orders:payments'), {'data': data})
+
+    return [client, response]
+
+
+@pytest.fixture
+def payment_success_login(db, place_order_login):
+    client = place_order_login
+    order_number = Order.objects.get(pk=1).order_number
+    data = {
+        'payment_id': 2277196704, 'status': 'success',
+        'paytype': 'privat24', 'order_id': order_number,
+    }
+
+    data = base64.b64encode(json.dumps(data).encode("utf-8")).decode("ascii")
+    response = client.post(reverse('orders:payments'), {'data': data})
+
+    return [client, response]
+
+
+@pytest.fixture
 def image_for_test():
     image = Image.new('RGB', (300, 300), color='red')
     image_file = SimpleUploadedFile('red_image.png', image.tobytes(), content_type='image/png')
@@ -115,4 +196,3 @@ def celery_config():
         "result_backend": "cache+memory://",
         'task_always_eager': True,
     }
-

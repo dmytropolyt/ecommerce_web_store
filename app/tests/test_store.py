@@ -2,7 +2,7 @@
 Tests for store app.
 """
 import pytest
-from pytest_django.asserts import assertContains
+from pytest_django.asserts import assertContains, assertJSONEqual
 
 from django.urls import reverse
 
@@ -102,10 +102,47 @@ class TestStore:
         assertContains(response, product.description)
         assertContains(response, product.price)
 
-    def test_submit_review(self, client_user_login, product):
+        product.image.delete()
+
+    def test_submit_review(self, payment_success_login):
         """Test submit review on product."""
-        product = product()
-        response = client_user_login.post(
-            reverse('store:submit-review', args=[product.id]),
-            {'rating': '5', 'subject': 'Review', 'review': 'review'}
+        client = payment_success_login[0]
+        response = client.post(
+            reverse('store:submit-review', kwargs={'product_id': 2}),
+            {'rating': '5.0', 'subject': 'Review', 'review': 'It is nice product!'},
+            HTTP_REFERER=reverse('store:product-detail', args=['test', 'Jacket'])
         )
+
+        review = Product.objects.get(pk=2).review.first()
+
+        assert response.status_code == 302
+        assert review.subject == 'Review'
+        assert review.rating == 5.0
+        assert review.review == 'It is nice product!'
+
+    def test_add_remove_to_wishlist(self, client_user_login, product):
+        """Test add and remove to wishlist."""
+        product = product(name='Jacket')
+        response = client_user_login.post(reverse('store:add-wishlist'), {'product': product.id})
+
+        # Test add to wishlist
+        assert response.status_code == 200
+        assertJSONEqual(str(response.content, encoding='utf8'), {'bool': True})
+
+        # Test remove from wishlist
+        response = client_user_login.post(reverse('store:add-wishlist'), {'product': product.id})
+        assert response.status_code == 200
+        assertJSONEqual(str(response.content, encoding='utf8'), {'bool': False})
+
+        product.image.delete()
+
+    def test_wishlist(self, client_user_login, product):
+        """Test WishListView."""
+        product = product(name='Jacket')
+        client_user_login.post(reverse('store:add-wishlist'), {'product': product.id})
+
+        response = client_user_login.get(reverse('store:my-wishlist'))
+        assert response.status_code == 200
+        assertContains(response, product.name)
+
+        product.image.delete()

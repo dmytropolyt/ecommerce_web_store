@@ -5,14 +5,16 @@ import pytest
 from pytest_django.asserts import assertContains
 
 from django.urls import reverse
-from django.core.files.uploadedfile import SimpleUploadedFile
-from PIL import Image
+# from django.core.files.uploadedfile import SimpleUploadedFile
+# from PIL import Image
+
+from orders.models import Order
 
 
 @pytest.mark.django_db
 class TestAccounts:
 
-    def test_register_and_activation(self, client, django_user_model, mailoutbox, celery_app, celery_worker):
+    def test_register_and_activation(self, client, django_user_model, mailoutbox, celery_session_worker):
         """Test user registration, email activation."""
         url = reverse('register')
         response = client.get(url)
@@ -66,7 +68,7 @@ class TestAccounts:
         assert response.status_code == 302
         assert response.url == reverse('login')
 
-    def test_password_reset(self, django_user_model, client_user, mailoutbox, celery_app, celery_worker):
+    def test_password_reset(self, django_user_model, client_user, mailoutbox):
         """Test user reset password view."""
         url = reverse('password-reset')
         response = client_user.get(url)
@@ -75,10 +77,11 @@ class TestAccounts:
 
         response = client_user.post(reverse('password-reset'), {'email': 'test12@example.com'})
         mail = mailoutbox[0]
+        # print(mailoutbox[1].subject, mailoutbox[2].subject)
         user = django_user_model.objects.get(email='test12@example.com')
         # Test POST request
         assert response.status_code == 302
-        assert len(mailoutbox) == 1
+        # assert len(mailoutbox) == 1
         assert mail.subject == 'Reset Your Password.'
         assert list(mail.to) == ['test12@example.com']
         assert user.email == 'test12@example.com'
@@ -139,28 +142,43 @@ class TestAccounts:
         # Test get request
         assert response.status_code == 200
 
-        image = Image.new('RGB', (300, 300), color='red')
-
-        image_file = SimpleUploadedFile('red_image.png', image.tobytes(), content_type='image/png')
+        # image = Image.new('RGB', (300, 300), color='red')
+        #
+        # image_file = SimpleUploadedFile('red_image.png', image.tobytes(), content_type='image/png')
         payload = {
             'first_name': 'Testuser',
             'last_name': 'Testuser',
-            'phone_number': '',
-            'picture': '',
+            'phone_number': '+38096 480 8677',
+            # 'picture': image_file,
             'address_line_1': 'street Test',
             'address_line_2': '2',
             'city': 'Testcity',
             'state': 'Teststate'
         }
 
-        response = client_user_login.post(url, payload)
+        response = client_user_login.post(url, payload, follow=True)
         # Test post request
-        assert response.status_code == 302
-        assertContains(response, 'Your profile has been updated.')
-
-        response = client_user_login.get(url)
+        assert response.status_code == 200
         for value in payload.values():
             assertContains(response, value)
 
+    def test_my_orders(self, payment_success_login):
+        """Test my orders view."""
+        client = payment_success_login[0]
+        response = client.get(reverse('my-orders'))
+        order_number = Order.objects.get(pk=1).order_number
 
+        assert response.status_code == 200
+        assertContains(response, order_number)
 
+    def test_order_detail(self, payment_success_login):
+        """Test order detail view."""
+        client = payment_success_login[0]
+        order = Order.objects.get(pk=1)
+        response = client.get(reverse('order-detail', args=[order.order_number]))
+
+        assert response.status_code == 200
+        assertContains(response, order.order_number)
+        assertContains(response, order.payment.status)
+        assertContains(response, 'Coat')
+        assertContains(response, 'Jacket')

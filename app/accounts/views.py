@@ -188,6 +188,7 @@ class EditProfileView(LoginRequiredMixin, TemplateView):
         userprofile = self.get_context_data()['userprofile']
         user_form = EditUserForm(request.POST, instance=request.user)
         profile_form = EditUserProfileForm(request.POST, request.FILES, instance=userprofile)
+        print(user_form.is_valid(), profile_form.is_valid())
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()

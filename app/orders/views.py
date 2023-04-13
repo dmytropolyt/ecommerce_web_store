@@ -32,6 +32,7 @@ class PaymentsView(TemplateView):
                 amount_paid=order.order_total,
                 status=data['status'],
             )
+
             if order.user:
                 payment.user = order.user
                 cart_items = CartItem.objects.filter(user=order.user)
@@ -71,7 +72,11 @@ class PaymentsView(TemplateView):
             cart_items.delete()
 
             # Send order received email to customer
-            send_order_email.delay({'order': order})
+            send_order_email.delay({
+                'first_name': order.first_name,
+                'order_number': order.order_number,
+                'email': order.email
+            })
 
             data = {
                 'order_number': order.order_number,

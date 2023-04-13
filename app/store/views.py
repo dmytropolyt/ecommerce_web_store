@@ -113,7 +113,7 @@ class SearchView(View):
             return render(request, 'store/store.html', context)
 
 
-class SubmitReviewView(CreateView):
+class SubmitReviewView(LoginRequiredMixin, CreateView):
     form_class = ReviewForm
     pk_url_kwarg = 'product_id'
 
@@ -124,7 +124,9 @@ class SubmitReviewView(CreateView):
             form = ReviewForm(request.POST, instance=reviews)
             form.save()
             messages.success(request, 'Thank you! Your review has been updated.')
+
             return redirect(url)
+
         except ReviewRating.DoesNotExist:
             form = ReviewForm(request.POST)
             if form.is_valid():
@@ -134,6 +136,7 @@ class SubmitReviewView(CreateView):
                 review.user_id = request.user.id
                 review.save()
                 messages.success(request, 'Thank you! Your review has been submitted.')
+
                 return redirect(url)
 
 
