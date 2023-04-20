@@ -20,7 +20,10 @@ class AccountAdmin(UserAdmin):
             None,
             {
                 "classes": ("wide",),
-                "fields": ("email", "username", "phone_number", "first_name", "last_name", "password1", "password2"),
+                "fields": (
+                    "email", "username", "phone_number",
+                    "first_name", "last_name", "password1", "password2"
+                ),
             },
         ),
     )
@@ -29,7 +32,9 @@ class AccountAdmin(UserAdmin):
 
 class UserProfileAdmin(admin.ModelAdmin):
     def thumbnail(self, object):
-        return format_html('<img src="{}" width="30" style="border-radius:50%;">'.format(object.picture.url))
+        return format_html(
+            '<img src="{}" width="30" style="border-radius:50%;">'.format(object.picture.url)
+        )
 
     thumbnail.short_description = 'Picture Profile'
     list_display = ('thumbnail', 'user', 'city', 'state',)

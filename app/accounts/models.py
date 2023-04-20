@@ -6,7 +6,9 @@ import os
 
 class MyAccountManager(BaseUserManager):
 
-    def create_user(self, first_name, last_name, username, email, password=None):
+    def create_user(
+            self, first_name, last_name, username, email, password=None
+    ):
         if not email:
             raise ValueError('User must have an email address.')
 
@@ -24,7 +26,9 @@ class MyAccountManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, first_name, last_name, email, username, password):
+    def create_superuser(
+            self, first_name, last_name, email, username, password
+    ):
         user = self.create_user(
             email=self.normalize_email(email),
             username=username,
@@ -81,7 +85,8 @@ class UserProfile(models.Model):
     user = models.OneToOneField(Account, related_name='profile', on_delete=models.CASCADE)
     address_line_1 = models.CharField(max_length=100, blank=True)
     address_line_2 = models.CharField(max_length=100, blank=True)
-    picture = models.ImageField(default='user_profile/default/default_user.png', upload_to=image_upload_to)
+    picture = models.ImageField(default='user_profile/default/default_user.png',
+                                upload_to=image_upload_to)
     city = models.CharField(blank=True, max_length=20)
     state = models.CharField(blank=True, max_length=20)
 

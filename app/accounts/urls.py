@@ -10,7 +10,10 @@ urlpatterns = [
     path('', views.DashboardView.as_view(), name='dashboard'),
 
     path('activate/<uidb64>/<token>/', views.ActivateView.as_view(), name='activate'),
-    path('reset-password/', views.AccountPasswordResetView.as_view(), name='password-reset'),
+    path(
+        'reset-password/',
+        views.AccountPasswordResetView.as_view(), name='password-reset'
+    ),
     path(
         'reset-password-validate/<uidb64>/<token>/',
         views.AccountPasswordResetConfirmView.as_view(),
@@ -19,6 +22,13 @@ urlpatterns = [
 
     path('my-orders/', views.UserOrdersView.as_view(), name='my-orders'),
     path('edit-profile/', views.EditProfileView.as_view(), name='edit-profile'),
-    path('change-password/', views.ChangePasswordView.as_view(), name='change-password'),
-    path('order-detail/<int:order_id>/', views.OrderDetailView.as_view(), name='order-detail')
+    path(
+        'change-password/',
+        views.ChangePasswordView.as_view(),
+        name='change-password'
+    ),
+    path(
+        'order-detail/<int:order_id>/',
+        views.OrderDetailView.as_view(), name='order-detail'
+    )
 ]

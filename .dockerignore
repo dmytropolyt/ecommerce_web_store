@@ -6,7 +6,7 @@
 .gitignore
 
 #sqlite
-db.sqlite3
+app/db.sqlite3
 
 # Docker
 .docker
@@ -20,3 +20,8 @@ app/*/*/*/__pycache__/
 .env/
 .venv/
 venv/
+
+# Elastic Beanstalk Files
+app/.elasticbeanstalk/*
+!.elasticbeanstalk/*.cfg.yml
+!.elasticbeanstalk/*.global.yml

@@ -1,11 +1,13 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
-from django.views.generic import View, CreateView, TemplateView, ListView, DetailView
+from django.views.generic import (View, CreateView,
+                                  TemplateView, ListView, DetailView)
 from django.contrib.auth.views import PasswordResetConfirmView, PasswordChangeView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import get_user_model
 from django.contrib import messages, auth
-from .forms import RegistrationForm, ForgotPasswordForm, EditUserForm, EditUserProfileForm, ChangePasswordForm
+from .forms import (RegistrationForm, ForgotPasswordForm,
+                    EditUserForm, EditUserProfileForm, ChangePasswordForm)
 from .models import UserProfile
 from .tasks import send_activation_email
 
@@ -16,7 +18,7 @@ from django.utils.encoding import force_bytes
 from django.contrib.auth.tokens import default_token_generator
 
 from carts.models import Cart, CartItem
-from orders.models import Order, OrderProduct
+from orders.models import Order
 from carts.views import _cart_id
 from functools import reduce
 import requests
@@ -218,7 +220,8 @@ class OrderDetailView(LoginRequiredMixin, DetailView):
         context = super().get_context_data(**kwargs)
 
         context['sub_total'] = reduce(
-            lambda a, b: a+b, [i.product_price * i.quantity for i in context['order'].order_product.all()]
+            lambda a, b: a+b,
+            [i.product_price * i.quantity for i in context['order'].order_product.all()]
         )
 
         return context

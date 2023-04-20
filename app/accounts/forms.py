@@ -1,5 +1,8 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm, SetPasswordForm, PasswordChangeForm
+from django.contrib.auth.forms import (
+    UserCreationForm,
+    SetPasswordForm
+)
 from .models import Account, UserProfile
 
 from django.core.exceptions import ValidationError
@@ -19,7 +22,10 @@ class RegistrationForm(UserCreationForm):
 
     class Meta:
         model = Account
-        fields = ['first_name', 'last_name', 'phone_number', 'email', 'username', 'password1', 'password2']
+        fields = [
+            'first_name', 'last_name', 'phone_number',
+            'email', 'username', 'password1', 'password2'
+        ]
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -93,12 +99,15 @@ class EditUserForm(forms.ModelForm):
 
 class EditUserProfileForm(forms.ModelForm):
     picture = forms.ImageField(
-        required=False, error_messages={'invalid': ('Image files only')}, widget=forms.FileInput
+        required=False, error_messages={'invalid': ('Image files only')},
+        widget=forms.FileInput
     )
 
     class Meta:
         model = UserProfile
-        fields = ('address_line_1', 'address_line_2', 'city', 'state', 'picture')
+        fields = (
+            'address_line_1', 'address_line_2', 'city', 'state', 'picture'
+        )
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

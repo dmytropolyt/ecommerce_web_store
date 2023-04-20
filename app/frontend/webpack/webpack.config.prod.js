@@ -2,7 +2,7 @@ const path = require("path");
 const BundleTracker = require('webpack-bundle-tracker');
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 const TerserPlugin = require('terser-webpack-plugin');
-const OptimizeCssAssetsPlugin = require('optimize-css-assets-webpack-plugin');
+const OptimizeCssAssetsPlugin = require("css-minimizer-webpack-plugin");
 
 module.exports = {
     entry: path.resolve(__dirname, '../src/js/index.js'),
