@@ -20,7 +20,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Env variables
-load_dotenv(BASE_DIR.parent / '.env')
+# load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get('DEBUG', '0'))
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['django-homewearstore-dev.eba-ytvk4fvr.us-west-2.elasticbeanstalk.com']
 ALLOWED_HOSTS.extend(
     filter(None, os.environ.get('ALLOWED_HOSTS').split(','))
 )
