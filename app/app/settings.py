@@ -193,10 +193,20 @@ LIQPAY_PRIVATE_KEY = os.environ.get('LIQPAY_PRIVATE_KEY')
 
 # Celery Configuration Options
 
-CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
+
+if 'AWS_SQS' in os.environ:
+    CELERY_BROKER_URL = os.environ.get('AWS_SQS')
+    CELERY_BROKER_TRANSPORT_OPTIONS = {
+        "region": "us-west-2",
+        'visibility_timeout': 7200,
+        'polling_interval': 1
+    }
+else:
+    CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
+
 
 # Stores my tasks status in django database
 
