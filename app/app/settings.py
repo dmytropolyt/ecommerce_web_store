@@ -32,7 +32,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY')
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = int(os.environ.get('DEBUG', '0'))
 
-ALLOWED_HOSTS = [ 'django-homewearstore-env.eba-ytvk4fvr.us-west-2.elasticbeanstalk.com']
+ALLOWED_HOSTS = ['django-homewearstore-env.eba-ytvk4fvr.us-west-2.elasticbeanstalk.com']
 ALLOWED_HOSTS.extend(
     filter(None, os.environ.get('ALLOWED_HOSTS').split(','))
 )
