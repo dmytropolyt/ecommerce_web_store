@@ -55,6 +55,7 @@ INSTALLED_APPS = [
     'store',
     'carts',
     'orders',
+    'storages',
 ]
 
 MIDDLEWARE = [
@@ -155,16 +156,41 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/
 
-STATIC_URL = 'static/'
+if 'AWS_STORAGE_BUCKET_NAME' in os.environ:
+    # AWS S3 Static Files Configuration
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
+    AWS_ACCESS_KEY_ID = os.environ.get('AWS_ACCESS_KEY_ID_S3')
+    AWS_SECRET_ACCESS_KEY = os.environ.get('AWS_SECRET_ACCESS_KEY_S3')
+    AWS_STORAGE_BUCKET_NAME = os.environ.get('AWS_STORAGE_BUCKET_NAME')
+    AWS_S3_CUSTOM_DOMAIN = '%s.s3.amazonaws.com' % AWS_STORAGE_BUCKET_NAME
+    AWS_S3_OBJECT_PARAMETERS = {
+        'CacheControl': 'max-age=86400',
+    }
+    AWS_S3_FILE_OVERWRITE = False
+    AWS_DEFAULT_ACL = 'public-read'
+    AWS_LOCATION = 'static'
 
-STATICFILES_DIRS = [
-    'app/static',
-    'frontend/build',
-]
+    STATICFILES_DIRS = [
+        'app/static',
+        'frontend/build'
+    ]
+    STATIC_URL = 'https://%s/%s/' % (AWS_S3_CUSTOM_DOMAIN, AWS_LOCATION)
+    STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+
+else:
+    STATIC_URL = 'static/'
+
+    STATIC_ROOT = BASE_DIR / 'staticfiles'
+
+    STATICFILES_DIRS = [
+        'app/static',
+        'frontend/build',
+    ]
 
 # Media files configuration
+if 'AWS_STORAGE_BUCKET_NAME' in os.environ:
+    DEFAULT_FILE_STORAGE = 'app.media_storages.MediaStorage'
+
 MEDIA_URL = 'media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
