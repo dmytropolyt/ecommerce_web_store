@@ -201,6 +201,7 @@ if 'AWS_SQS' in os.environ:
     CELERY_BROKER_URL = os.environ.get('AWS_SQS')
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         "region": "us-west-2",
+        'queue_name_prefix': 'homewearstore-',
         'visibility_timeout': 7200,
         'polling_interval': 1
     }
