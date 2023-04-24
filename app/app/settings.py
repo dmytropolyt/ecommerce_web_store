@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 from dotenv import load_dotenv
 import os
+from kombu.utils.url import safequote
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -197,8 +198,10 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
-if 'AWS_SQS' in os.environ:
-    CELERY_BROKER_URL = os.environ.get('AWS_SQS')
+if 'AWS_ACCESS_KEY_ID' in os.environ:
+    access_key_id = safequote(os.environ.get('AWS_ACCESS_KEY_ID'))
+    secret_access_key = safequote(os.environ.get('AWS_SECRET_ACCESS_KEY'))
+    CELERY_BROKER_URL = f'sqs://{access_key_id}:{secret_access_key}@'
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         "region": "us-west-2",
         'queue_name_prefix': 'homewearstore-',
