@@ -88,7 +88,7 @@
 					<h5 class="text-danger">Out of Stock</h5>
 				{% else %}
 					<button type="submit" form="add-to-cart" class="btn btn-primary add-to-cart" data-product="{{ single_product.id }}" style="width: 150px;">
-						<span class="text">Add to cart</span> <i class="fas fa-shopping-cart"></i>  </button>
+						<span class="text">Add to cart</span> <i class="fa fa-shopping-cart"></i>  </button>
 				{% endif %}
 
 				{% if user in single_product.users_wishlist.all %}
