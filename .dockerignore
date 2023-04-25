@@ -5,6 +5,9 @@
 .git
 .gitignore
 
+# AWS
+.ebextensions
+Procfile
 #sqlite
 app/db.sqlite3
 
@@ -17,6 +20,7 @@ app/__pycache__/
 app/*/__pycache__/
 app/*/*/__pycache__/
 app/*/*/*/__pycache__/
+app/requirements.txt
 .env/
 .venv/
 venv/

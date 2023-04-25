@@ -4,7 +4,6 @@ ENV PYTHONUNBUFFERED 1
 
 COPY ./requirements.txt /tmp/requirements.txt
 COPY ./app /app
-COPY ./entrypoint.sh /app/entrypoint.sh
 
 WORKDIR /app
 
@@ -26,12 +25,13 @@ RUN cd frontend && \
     npm install && \
     npm run build
 
+COPY ./entrypoint.sh /entrypoint.sh
 
-RUN sed -i 's/\r$//g' /app/entrypoint.sh
-RUN chmod +x /app/entrypoint.sh
+RUN sed -i 's/\r$//g' /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 
 
 ENV PATH="/scripts:/py/bin:$PATH"
 
 
-ENTRYPOINT ["app/entrypoint.sh"]
+ENTRYPOINT ["/entrypoint.sh"]
