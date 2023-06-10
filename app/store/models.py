@@ -11,11 +11,17 @@ User = get_user_model()
 
 
 class Product(models.Model):
+
+    def image_upload_to(self, instance=None):
+        if instance:
+            return os.path.join('store/products', self.name, instance)
+        return None
+
     name = models.CharField(max_length=200, unique=True)
     slug = models.SlugField(max_length=200, unique=True)
     description = models.TextField(max_length=500, blank=True)
     price = models.IntegerField()
-    image = models.ImageField(upload_to='products')
+    image = models.ImageField(upload_to=image_upload_to)
     stock = models.IntegerField()
     is_available = models.BooleanField(default=True)
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

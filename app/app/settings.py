@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # Env variables
-load_dotenv(BASE_DIR.parent / '.env')
+# load_dotenv(BASE_DIR / '.env')
 
 
 # Quick-start development settings - unsuitable for production
@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django_celery_beat',
     'django_celery_results',
+    'health_check',
     'category',
     'accounts.apps.AccountsConfig',
     'store',
@@ -224,16 +225,18 @@ CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
 
+
 if 'AWS_ACCESS_KEY_ID' in os.environ:
     access_key_id = safequote(os.environ.get('AWS_ACCESS_KEY_ID'))
     secret_access_key = safequote(os.environ.get('AWS_SECRET_ACCESS_KEY'))
     CELERY_BROKER_URL = f'sqs://{access_key_id}:{secret_access_key}@'
     CELERY_BROKER_TRANSPORT_OPTIONS = {
         "region": "us-west-2",
-        'queue_name_prefix': 'homewearstore-',
         'visibility_timeout': 7200,
-        'polling_interval': 1
+        'polling_interval': 60
     }
+    CELERY_DEFAULT_QUEUE = 'homewearstore-celery'
+    CELERY_TASK_DEFAULT_QUEUE = 'homewearstore-celery'
 else:
     CELERY_BROKER_URL = os.environ.get('CELERY_BROKER_URL')
 
